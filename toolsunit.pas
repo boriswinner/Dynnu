@@ -467,6 +467,7 @@ begin
   LineStyleComboBox.Name := ('LineStyleComboBox');
   LineStyleComboBox.Parent := APanel;
   LineStyleComboBox.Align := alBottom;
+  LineStyleComboBox.ReadOnly := true;
   for i := ord(low(TFPPenStyle)) to ord(high(TFPPenStyle))-3 do
   begin
     LineStyleComboBox.Items.Add(GetEnumName(TypeInfo(TFPPenStyle),i));
@@ -492,6 +493,7 @@ begin
   FillStyleComboBox.Name := ('FillStyleComboBox');
   FillStyleComboBox.Parent := APanel;
   FillStyleComboBox.Align := alBottom;
+  FillStyleComboBox.ReadOnly := true;
   for i := ord(low(TBrushStyle)) to ord(high(TBrushStyle))-2 do
   begin
     FillStyleComboBox.Items.Add(GetEnumName(TypeInfo(TBrushStyle),i));

@@ -144,6 +144,7 @@ begin
     AntiAliasingComboBox.Items.Add(GetEnumName(TypeInfo(TAntiAliasingMode),i));
   end;
   AntiAliasingComboBox.ItemIndex := ord(Canvas.AntiAliasingMode);
+  AntiAliasingComboBox.ReadOnly := true;
 
 
   HorizontalScrollBar.max := MainPaintBox.Width;
@@ -338,7 +339,7 @@ var
   oldzoom:double;
 begin
   oldzoom := Zoom;
-  Zoom := ZoomSpinEdit.Value;
+  Zoom := abs(ZoomSpinEdit.Value);
   CenterZoom(MainPaintBox.Width,MainPaintBox.Height,oldzoom);
   Invalidate;
 end;
