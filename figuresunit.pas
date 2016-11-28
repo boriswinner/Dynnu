@@ -53,7 +53,8 @@ type
   FigurePenStyle: TPenStyle;
   FigureBrushStyle: TBrushStyle;
   FigureCorners: integer;
-  FigureAngle: integer;
+  FigureAngle: double;
+  FigureAngleMode: boolean;
   public
     procedure Draw(Canvas:TCanvas); override;
     function Rotate(P1,P2: TFloatPoint; angle: double): TFloatPoint;
@@ -78,7 +79,7 @@ var
   BrushStyle: TBrushStyle;
   PenWidth: integer;
   Corners: integer;
-  Angle: integer;
+  Angle: double;
 implementation
 
 procedure TPolyline.Draw(Canvas: TCanvas);
@@ -152,7 +153,7 @@ end;
 
 procedure TPolygon.Draw(Canvas: TCanvas);
 var
-  P1,P2, PIntersection: TFloatPoint;
+  P1,P2: TFloatPoint;
   r: double;
   i,k: integer;
   PolygonPoints: array of TFloatPoint;
@@ -160,16 +161,16 @@ var
 begin
   P1 := Points[low(Points)];
   P2 := Points[high(Points)];
-  PIntersection := FloatPoint(P2.x,P1.y);
-  r := sqrt(sqr(P2.x-P1.x) + sqr(P2.y-P1.y));
+  r := sqrt(abs(sqr(P2.x-P1.x) + sqr(P2.y-P1.y)));
   k:=360 div FigureCorners;
+  if (not FigureAngleMode) then FigureAngle := Arctan2(p1.Y - p2.Y, p1.X - p2.X);
   setlength (PolygonPoints, Figurecorners);
   setlength (PolygonPointsScr, Figurecorners);
   for i := low(PolygonPoints) to high(PolygonPoints) do
   begin
     PolygonPoints[i].x := P1.x + r*cos(i*k/180*Pi);
     PolygonPoints[i].y := P1.Y + r*sin(i*k/180*Pi);
-    PolygonPointsScr[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],(FigureAngle*Pi/180)));
+    PolygonPointsScr[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],FigureAngle));
   end;
   Canvas.Pen.Color := FigurePenColor;
   Canvas.Pen.Width := FigurePenWidth;

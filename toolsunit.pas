@@ -26,7 +26,7 @@ type
     procedure CreateAngleSpinEdit(APanel: TPanel);
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer); virtual;
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean); virtual;
     procedure AddPoint(APoint: TPoint); virtual;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); virtual;
     procedure PenStyleComboBoxSelect(Sender: TObject);
@@ -34,6 +34,7 @@ type
     procedure LineWidthSpinEditSelect (Sender: TObject);
     procedure CornersSpinEditSelect (Sender: TObject);
     procedure AngleSpinEditSelect (Sender: TObject);
+    procedure AngleModeSpinEditSelect (Sender: TObject);
   end;
 
   TTwoPointsTools = class(TTool)
@@ -53,7 +54,7 @@ type
   public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);override;
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);override;
     procedure AddPoint(APoint: TPoint); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
   end;
@@ -63,7 +64,7 @@ type
   public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer); override;
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean); override;
   end;
 
   TRectangleTool  = class(TTwoPointsTools)
@@ -71,7 +72,7 @@ type
   public
      procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
        APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-       ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer); override;
+       ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean); override;
   end;
 
   TEllipseTool    = class(TTwoPointsTools)
@@ -79,7 +80,7 @@ type
   public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer); override;
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean); override;
   end;
 
   TPolygonTool = class(TTwoPointsTools)
@@ -87,7 +88,7 @@ type
   public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer); override;
+      ABrushStyle: TBrushStyle;APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean); override;
     procedure Initialize(APanel: TPanel); override;
   end;
 
@@ -96,7 +97,7 @@ type
   public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer); override;
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean); override;
     procedure Initialize(APanel: TPanel); override;
   end;
 
@@ -106,7 +107,7 @@ type
   public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer); override;
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
     procedure Initialize(APanel: TPanel); override;
   end;
@@ -114,11 +115,13 @@ type
 var
   ToolsRegister: array of TTool;
   OffsetFirstPoint: TPoint;
+  AngleSpinEdit: TSpinEdit;
+  AngleMode: boolean;
 implementation
 
 procedure TTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   SetLength(Figures,length(Figures)+1);
   Figures[high(Figures)] := AFigureClass.Create;
@@ -131,7 +134,7 @@ begin
 end;
 procedure TPolylineTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   Inherited;
   (Figures[high(Figures)] as TPolyline).FigurePenStyle := APenStyle;
@@ -141,7 +144,7 @@ end;
 
 procedure THandTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   Inherited;
   OffsetFirstPoint.x:=Offset.x+APoint.x;
@@ -150,7 +153,7 @@ end;
 
 procedure TRectangleTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   Inherited;
   (Figures[high(Figures)] as TRectangle).FigurePenStyle := APenStyle;
@@ -161,7 +164,7 @@ end;
 
 procedure TEllipseTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   Inherited;
   (Figures[high(Figures)] as TEllipse).FigurePenStyle := APenStyle;
@@ -172,7 +175,7 @@ end;
 
 procedure TLineTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   Inherited;
   (Figures[high(Figures)] as TLine).FigurePenStyle := APenStyle;
@@ -182,20 +185,21 @@ end;
 
 procedure TPolygonTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   Inherited;
   (Figures[high(Figures)] as TPolygon).FigurePenStyle := APenStyle;
   (Figures[high(Figures)] as TPolygon).FigureBrushStyle := ABrushStyle;
   (Figures[high(Figures)] as TPolygon).FigurePenWidth := APenWidth;
   (Figures[high(Figures)] as TPolygon).FigureCorners := ACorners;
-  (Figures[high(Figures)] as TPolygon).FigureAngle := Aangle;
+  (Figures[high(Figures)] as TPolygon).FigureAngle := AAngle;
+  (Figures[high(Figures)] as TPolygon).FigureAngleMode := AngleMode;
   SetMaxMinFloatPoints(ScreenToWorld(APoint));
 end;
 
 procedure TMagnifierTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint;
       APenColor,ABrushColor: TColor; APenStyle: TPenStyle;
-      ABrushStyle: TBrushStyle; APenWidth, ACorners, AAngle: integer);
+      ABrushStyle: TBrushStyle; APenWidth, ACorners: integer; AAngle: double; AngleMode: boolean);
 begin
   Inherited;
 end;
@@ -299,7 +303,21 @@ end;
 
 procedure TTool.AngleSpinEditSelect (Sender: TObject);
 begin
-  Angle := (Sender as TSpinEdit).Value;
+  Angle := ((Sender as TSpinEdit).Value*Pi)/180;
+end;
+
+procedure TTool.AngleModeSpinEditSelect (Sender: TObject);
+begin
+  if ((Sender as TCheckBox).Checked = true) then
+  begin
+    AngleSpinEdit.Enabled := true;
+    AngleMode := true;
+  end
+  else
+  begin
+    AngleSpinEdit.Enabled := false;
+    AngleMode := false;
+  end;
 end;
 
 procedure TTool.CreateLineWidthSpinEdit(APanel: TPanel);
@@ -344,8 +362,8 @@ end;
 
 procedure TTool.CreateAngleSpinEdit(APanel: TPanel);
 var
-  AngleSpinEdit: TSpinEdit;
   l: TLabel;
+  c: TCheckBox;
 begin
   AngleSpinEdit := TSpinEdit.Create(APanel);
   AngleSpinEdit.Name := 'AngleSpinEdit';
@@ -355,6 +373,13 @@ begin
   AngleSpinEdit.MinValue := 0;
   AngleSpinEdit.Value := Angle;
   AngleSpinEdit.OnChange := @AngleSpinEditSelect;
+  AngleSpinEdit.Enabled := false;
+  c := TCheckBox.Create(APanel);
+  c.Parent := APanel;
+  c.name := 'AngleModeCheckBox';
+  c.caption := 'Manual angle control';
+  c.onChange := @AngleModeSpinEditSelect;
+  c.Align := alBottom;
   l := TLabel.Create(APanel);
   l.name := 'AngleLabel';
   l.Caption := 'Rotate Angle';
@@ -451,5 +476,7 @@ RegisterTool (TLineTool.Create, TLine, 'Line.bmp');
 RegisterTool (TMagnifierTool.Create, TMagnifierFrame, 'Magnifier.bmp');
 RegisterTool (THandTool.Create, THandFigure, 'Hand.bmp');
 RegisterTool (TPolygonTool.Create, TPolygon, 'Polygon.bmp');
+
+AngleMode := false;
 end.
 
