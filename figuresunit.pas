@@ -33,6 +33,15 @@ type
     procedure Draw(Canvas:TCanvas); override;
   end;
 
+  TRoundRect      = class(TFigure)
+  FigurePenStyle: TPenStyle;
+  FigureBrushStyle: TBrushStyle;
+  FigurePenWidth: integer;
+  FigureR: TPoint;
+  public
+    procedure Draw(Canvas:TCanvas); override;
+  end;
+
   TEllipse        = class(TFigure)
   FigurePenStyle: TPenStyle;
   FigureBrushStyle: TBrushStyle;
@@ -80,6 +89,7 @@ var
   PenWidth: integer;
   Corners: integer;
   Angle: double;
+  RectR: TPoint;
 implementation
 
 procedure TPolyline.Draw(Canvas: TCanvas);
@@ -110,6 +120,21 @@ begin
                    scalesunit.WorldToScreen(Points[low(Points)]) .y,
                    scalesunit.WorldToScreen(Points[high(Points)]).x,
                    scalesunit.WorldToScreen(Points[high(Points)]).y);
+end;
+
+procedure TRoundRect.Draw(Canvas: TCanvas);
+begin
+  Canvas.Pen.Color := FigurePenColor;
+  Canvas.Pen.Width := FigurePenWidth;
+  Canvas.Brush.Color := FigureBrushColor;
+  Canvas.Pen.Style := FigurePenStyle;
+  Canvas.Brush.Style := FigureBrushStyle;
+  Canvas.RoundRect(scalesunit.WorldToScreen(Points[low(Points)]) .x,
+                   scalesunit.WorldToScreen(Points[low(Points)]) .y,
+                   scalesunit.WorldToScreen(Points[high(Points)]).x,
+                   scalesunit.WorldToScreen(Points[high(Points)]).y,
+                   FigureR.x,
+                   FigureR.y);
 end;
 
 procedure TEllipse.Draw(Canvas: TCanvas);
