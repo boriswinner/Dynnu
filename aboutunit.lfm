@@ -1,0 +1,58 @@
+object AboutForm: TAboutForm
+  Left = 276
+  Height = 240
+  Top = 271
+  Width = 300
+  Caption = 'AboutForm'
+  ClientHeight = 240
+  ClientWidth = 300
+  Constraints.MaxHeight = 240
+  Constraints.MaxWidth = 300
+  Constraints.MinHeight = 240
+  Constraints.MinWidth = 300
+  Position = poScreenCenter
+  LCLVersion = '1.6.0.4'
+  object AboutMemo: TMemo
+    Left = 0
+    Height = 240
+    Top = 0
+    Width = 300
+    Align = alClient
+    Lines.Strings = (
+      'Dynnu - a vector graphics editor.'
+      'This program was made by Boris Timofeenko.'
+      'FEFU, 2016.'
+      'This program is licensed under GPL v3 license.'
+    )
+    TabOrder = 0
+  end
+  object LicenseButton: TButton
+    Left = 8
+    Height = 25
+    Top = 208
+    Width = 88
+    Align = alCustom
+    Caption = 'View License'
+    OnClick = LicenseButtonClick
+    TabOrder = 1
+  end
+  object GitHubButton: TButton
+    Left = 104
+    Height = 25
+    Top = 208
+    Width = 104
+    Align = alCustom
+    Caption = 'View on GitHub'
+    OnClick = GitHubButtonClick
+    TabOrder = 2
+  end
+  object OKButton: TButton
+    Left = 216
+    Height = 25
+    Top = 208
+    Width = 75
+    Caption = 'OK'
+    OnClick = OKButtonClick
+    TabOrder = 3
+  end
+end

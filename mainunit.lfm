@@ -1,0 +1,231 @@
+object MainForm: TMainForm
+  Left = 784
+  Height = 480
+  Top = 163
+  Width = 603
+  Caption = 'Dynnu'
+  ClientHeight = 460
+  ClientWidth = 603
+  Constraints.MinHeight = 240
+  Constraints.MinWidth = 320
+  KeyPreview = True
+  Menu = MainMenu
+  OnActivate = FormActivate
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  Position = poScreenCenter
+  LCLVersion = '1.6.0.4'
+  object PaintPanel: TPanel
+    Left = 170
+    Height = 460
+    Top = 0
+    Width = 345
+    Align = alClient
+    ClientHeight = 460
+    ClientWidth = 345
+    Color = clWhite
+    ParentColor = False
+    TabOrder = 0
+    object MainPaintBox: TPaintBox
+      Left = 1
+      Height = 441
+      Top = 1
+      Width = 326
+      Align = alClient
+      Color = clWhite
+      ParentColor = False
+      OnMouseDown = MainPaintBoxMouseDown
+      OnMouseMove = MainPaintBoxMouseMove
+      OnMouseUp = MainPaintBoxMouseUp
+      OnPaint = MainPaintBoxPaint
+      OnResize = MainPaintBoxResize
+    end
+    object VerticalScrollBar: TScrollBar
+      Left = 327
+      Height = 441
+      Top = 1
+      Width = 17
+      Align = alRight
+      Kind = sbVertical
+      PageSize = 1
+      TabOrder = 0
+      OnScroll = ScrollBarScroll
+    end
+    object HorizontalScrollBar: TScrollBar
+      Left = 1
+      Height = 17
+      Top = 442
+      Width = 343
+      Align = alBottom
+      PageSize = 0
+      TabOrder = 1
+      OnScroll = ScrollBarScroll
+    end
+  end
+  object ColorsPanel: TPanel
+    Left = 515
+    Height = 460
+    Top = 0
+    Width = 88
+    Align = alRight
+    ClientHeight = 460
+    ClientWidth = 88
+    TabOrder = 1
+    object ColorLabel1: TLabel
+      Left = 1
+      Height = 15
+      Top = 429
+      Width = 86
+      Align = alBottom
+      Caption = '   '
+      ParentColor = False
+    end
+    object ColorLabel2: TLabel
+      Left = 1
+      Height = 15
+      Top = 444
+      Width = 86
+      Align = alBottom
+      Caption = '   '
+      ParentColor = False
+    end
+    object ColorsGrid: TDrawGrid
+      Left = -1
+      Height = 428
+      Top = 1
+      Width = 88
+      Align = alRight
+      Color = clMenu
+      ColCount = 3
+      DefaultColWidth = 16
+      DefaultRowHeight = 16
+      ExtendedSelect = False
+      FixedCols = 0
+      FixedRows = 0
+      RowCount = 2
+      TabOrder = 0
+      OnDblClick = ColorsGridDblClick
+      OnDrawCell = ColorsGridDrawCell
+      OnMouseDown = ColorsGridMouseDown
+    end
+  end
+  object ToolsPanel: TPanel
+    Left = 0
+    Height = 460
+    Top = 0
+    Width = 170
+    Align = alLeft
+    ClientHeight = 460
+    ClientWidth = 170
+    TabOrder = 2
+    object ZoomSpinEdit: TSpinEdit
+      Left = 1
+      Height = 23
+      Top = 411
+      Width = 168
+      Align = alBottom
+      Alignment = taCenter
+      AutoSelect = False
+      MaxValue = 800
+      MinValue = 1
+      OnChange = ZoomSpinEditChange
+      TabOrder = 0
+      Value = 100
+    end
+    object ShowAllButton: TButton
+      Left = 1
+      Height = 25
+      Top = 434
+      Width = 168
+      Align = alBottom
+      Caption = 'Show All'
+      OnClick = ShowAllButtonClick
+      TabOrder = 1
+    end
+    object ButtonsPanel: TPanel
+      Left = 1
+      Height = 100
+      Top = 1
+      Width = 168
+      Align = alTop
+      TabOrder = 2
+    end
+    object ZoomLabel: TLabel
+      Left = 1
+      Height = 15
+      Top = 396
+      Width = 168
+      Align = alBottom
+      Caption = 'Zoom'
+      ParentColor = False
+    end
+    object AntiAliasingComboBox: TComboBox
+      Left = 1
+      Height = 23
+      Top = 373
+      Width = 168
+      Align = alBottom
+      ItemHeight = 15
+      OnChange = AntiAliasingComboBoxChange
+      TabOrder = 3
+      Text = 'AntiAliasingComboBox'
+    end
+    object AntiAliasingLabel: TLabel
+      Left = 1
+      Height = 15
+      Top = 358
+      Width = 168
+      Align = alBottom
+      Caption = 'AntiAliasing Mode'
+      ParentColor = False
+    end
+  end
+  object MainMenu: TMainMenu
+    left = 24
+    object FileSubMenu: TMenuItem
+      Caption = 'File'
+      object ExitMenuItem: TMenuItem
+        Caption = 'Exit'
+        OnClick = ExitMenuItemClick
+      end
+      object ShowAllItem: TMenuItem
+        Caption = 'Show All'
+        OnClick = ShowAllItemClick
+      end
+    end
+    object HelpSubMenu: TMenuItem
+      Caption = 'Help'
+      object AboutMenuItem: TMenuItem
+        Caption = 'About'
+        OnClick = AboutMenuItemClick
+      end
+    end
+  end
+  object ColorsGridColorDialog: TColorDialog
+    Color = clBlack
+    CustomColors.Strings = (
+      'ColorA=000000'
+      'ColorB=000080'
+      'ColorC=008000'
+      'ColorD=008080'
+      'ColorE=800000'
+      'ColorF=800080'
+      'ColorG=808000'
+      'ColorH=808080'
+      'ColorI=C0C0C0'
+      'ColorJ=0000FF'
+      'ColorK=00FF00'
+      'ColorL=00FFFF'
+      'ColorM=FF0000'
+      'ColorN=FF00FF'
+      'ColorO=FFFF00'
+      'ColorP=FFFFFF'
+      'ColorQ=C0DCC0'
+      'ColorR=F0CAA6'
+      'ColorS=F0FBFF'
+      'ColorT=A4A0A0'
+    )
+    left = 24
+    top = 56
+  end
+end
