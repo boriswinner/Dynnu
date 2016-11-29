@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
   ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, FPCanvas, TypInfo,
-  Spin, aboutunit, figuresunit, toolsunit, scalesunit;
+  Spin, aboutunit, figuresunit, toolsunit, scalesunit, Types;
 
 type
   TFigureClass = figuresunit.TFigureClass;

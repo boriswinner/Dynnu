@@ -38,6 +38,8 @@ type
     procedure AngleModeSpinEditSelect (Sender: TObject);
     procedure RSpinEditXSelect (Sender: TObject);
     procedure RSpinEditYSelect (Sender: TObject);
+    procedure StyleComboBoxDrawItem(Control: TWinControl;
+  Index: Integer; ARect: TRect; State: TOwnerDrawState);
   end;
 
   TTwoPointsTools = class(TTool)
@@ -437,7 +439,7 @@ begin
 
   l := TLabel.Create(APanel);
   l.name := 'RSpinEditLabelX';
-  l.Caption := 'R X';
+  l.Caption := 'Rounding Radius (X)';
   l.Parent := APanel;
   l.Align := alBottom;
 
@@ -452,7 +454,7 @@ begin
 
   l := TLabel.Create(APanel);
   l.name := 'RSpinEditLabelY';
-  l.Caption := 'R Y';
+  l.Caption := 'Rounding Radius (Y)';
   l.Parent := APanel;
   l.Align := alBottom;
 end;
@@ -476,11 +478,44 @@ begin
     ord(high(TFPPenStyle))));
   LineStyleComboBox.ItemIndex := ord(PenStyle);
   LineStyleComboBox.OnSelect  := @PenStyleComboBoxSelect;
+  LineStyleComboBox.Style := csOwnerDrawFixed;
+  LineStyleComboBox.OnDrawItem := @StyleComboBoxDrawItem;
   l := TLabel.Create(APanel);
   l.name := 'LineStyleLabel';
   l.Caption := 'Line Style';
   l.Parent := APanel;
   l.Align := alBottom;
+end;
+
+procedure TTool.StyleComboBoxDrawItem(Control: TWinControl;
+Index: Integer; ARect: TRect; State: TOwnerDrawState);
+var
+  GraphicsRect: TRect;
+  t: TComboBox;
+begin
+    t := (Control as TComboBox);
+    GraphicsRect.Left   := ARect.Left   + 2;
+    GraphicsRect.Right  := ARect.Left   + 18;
+    GraphicsRect.Top    := ARect.Top    + 1;
+    GraphicsRect.Bottom := ARect.Bottom - 1;
+
+   t.Canvas.FillRect(ARect);
+   t.Canvas.TextRect(ARect, 22, ARect.Top, (Control as TComboBox).Items[Index]);
+   t.Canvas.Pen.Style := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle),
+     t.Items[Index]));
+   t.Canvas.Brush.Style := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle),
+     t.Items[Index]));
+   t.Canvas.Brush.Color := clBlack;
+
+   //костыль для bsClear
+   if TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle),
+     t.Items[Index])) = TBrushStyle(bsClear) then
+   begin
+     t.Canvas.Brush.Style := bsSolid;
+     t.Canvas.Brush.Color := clWhite;
+   end;
+
+   t.Canvas.Rectangle(GraphicsRect);
 end;
 
 procedure TTool.CreateFillStyleComboBox(APanel: TPanel);
@@ -500,6 +535,8 @@ begin
   end;
   FillStyleComboBox.ItemIndex := ord(BrushStyle);
   FillStyleComboBox.OnSelect  := @FillStyleComboBoxSelect;
+  FillStyleComboBox.Style := csOwnerDrawFixed;
+  FillStyleComboBox.OnDrawItem := @StyleComboBoxDrawItem;
   l := TLabel.Create(APanel);
   l.name := 'FillStyleLabel';
   l.Caption := 'Fill Style';
