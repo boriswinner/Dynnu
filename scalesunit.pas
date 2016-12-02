@@ -5,7 +5,8 @@ unit scalesunit;
 interface
 
 uses
-  Classes, SysUtils, GraphMath, ExtCtrls, Controls, Math;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
+  ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo;
 
 function  WorldToScreen        (APoint: TFloatPoint): TPoint;
 function  ScreenToWorld        (APoint: TPoint):      TFloatPoint;
@@ -59,6 +60,7 @@ end;
 
 procedure CenterZoom(AWidth,AHeight:integer;OldZoom:Double);
 begin
+  //ShowMessage(FloatToStr(Offset.x));
   if Zoom>oldzoom then
     begin
       Offset.x := Offset.x+round(AWidth*(Zoom-oldzoom)/200);
@@ -69,6 +71,7 @@ begin
       Offset.x := Offset.x-round(AWidth*(oldzoom-Zoom)/200);
       Offset.y := Offset.y-round(AHeight*(oldzoom-Zoom)/200);
     end;
+  //ShowMessage(FloatToStr(Offset.x));
 end;
 
 procedure RectZoom(AHeight,AWidth:Integer;AMin,AMax:TFloatPoint);
@@ -92,5 +95,6 @@ end;
 initialization
   MinFloatPoint := FloatPoint(0,0);
   MaxFloatPoint := (PaintBoxSize);
+  Offset := FloatPoint(0,0);
 end.
 

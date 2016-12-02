@@ -77,7 +77,7 @@ type
 
 var
   MainForm: TMainForm;
-  OldSize: TPoint;
+  OldPaintBoxSize: TPoint;
 implementation
 
 {$R *.lfm}
@@ -207,12 +207,15 @@ end;
 
 procedure TMainForm.MainPaintBoxResize(Sender: TObject);
 begin
-  Offset.x := round(Offset.x - (MainPaintBox.Width-OldSize.x) div 2);
-  Offset.y := round(Offset.y - (MainPaintBox.Height-OldSize.y) div 2);
+  if (OldPaintBoxSize <> Point(0,0)) then
+  begin
+    Offset.x := round(Offset.x - (MainPaintBox.Width-OldPaintBoxSize.x) div 2);
+    Offset.y := round(Offset.y - (MainPaintBox.Height-OldPaintBoxSize.y) div 2);
+  end;
   scalesunit.PaintBoxSize.x   := MainPaintBox.Width;
   scalesunit.PaintBoxSize.y   := MainPaintBox.Height;
-  OldSize.x := MainPaintBox.Width;
-  OldSize.y := MainPaintBox.Height;
+  OldPaintBoxSize.x := MainPaintBox.Width;
+  OldPaintBoxSize.y := MainPaintBox.Height;
 end;
 
 procedure TMainForm.ShowAllButtonClick(Sender: TObject);
