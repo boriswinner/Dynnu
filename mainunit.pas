@@ -87,8 +87,7 @@ procedure TMainForm.MainPaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   if (ssRight in Shift) then RBtn := true;
-  CurrentTool.FigureCreate(CurrentTool.FigureClass,Point(X,Y),PenColor,
-    BrushColor,PenStyle,BrushStyle,PenWidth, Corners, Angle, AngleMode,RectR);
+  CurrentTool.FigureCreate(CurrentTool.FigureClass,Point(X,Y));
   Invalidate;
 end;
 
@@ -166,8 +165,10 @@ end;
 procedure TMainForm.FormActivate(Sender: TObject);
 begin
   CurrentTool := TRectangleTool.Create;
-  CurrentTool.FigureCreate(TRectangle,Point(0,0),clWhite,clWhite,psSolid,bsSolid,1,1,0,false,RectR);
+  BrushColor := clWhite;
+  CurrentTool.FigureCreate(TRectangle,Point(0,0));
   CurrentTool.AddPoint(Point(MainPaintBox.Width,MainPaintBox.Height));
+  BrushColor := clBlack;
   CurrentTool := ToolsRegister[0];
   Invalidate;
   VerticalScrollBar.Max   := round(WorldToScreen(MaxFloatPoint).y);

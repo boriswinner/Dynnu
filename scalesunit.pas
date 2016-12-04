@@ -31,8 +31,8 @@ end;
 
 function ScreenToWorld (APoint: TPoint): TFloatPoint;
 begin
-  ScreenToWorld.X := (APoint.x+Offset.x)/(Zoom/100);
-  ScreenToWorld.Y := (APoint.y+Offset.y)/(Zoom/100);
+  ScreenToWorld.X:=(APoint.x+Offset.x)/(Zoom/100);
+  ScreenToWorld.Y:=(APoint.y+Offset.y)/(Zoom/100);
 end;
 
 procedure SetOffset (APoint: TFloatPoint);
@@ -60,7 +60,6 @@ end;
 
 procedure CenterZoom(AWidth,AHeight:integer;OldZoom:Double);
 begin
-  //ShowMessage(FloatToStr(Offset.x));
   if Zoom>oldzoom then
     begin
       Offset.x := Offset.x+round(AWidth*(Zoom-oldzoom)/200);
@@ -71,7 +70,6 @@ begin
       Offset.x := Offset.x-round(AWidth*(oldzoom-Zoom)/200);
       Offset.y := Offset.y-round(AHeight*(oldzoom-Zoom)/200);
     end;
-  //ShowMessage(FloatToStr(Offset.x));
 end;
 
 procedure RectZoom(AHeight,AWidth:Integer;AMin,AMax:TFloatPoint);
