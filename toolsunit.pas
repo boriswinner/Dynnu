@@ -15,9 +15,9 @@ type
   TToolClass   = class of TTool;
 
   TTool = class
-      Bitmap: TBitmap;
-      FigureClass: TFigureClass;
-  public
+    public
+    Bitmap: TBitmap;
+    FigureClass: TFigureClass;
     procedure Initialize(APanel: TPanel); virtual;
     procedure CreateLineWidthSpinEdit(APanel: TPanel);
     procedure CreateLineStyleComboBox(APanel: TPanel);
@@ -54,47 +54,46 @@ type
   THandTool       = class(TSpecificTools)
   public
     Figure: THandFigure;
-  public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);override;
     procedure AddPoint(APoint: TPoint); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
   end;
 
   TPolylineTool   = class(TTool)
-    Figure: TPolyline;
   public
+    Figure: TPolyline;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
   end;
 
   TRectangleTool  = class(TTwoPointsTools)
-    Figure: TRectangle;
   public
-     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    Figure: TRectangle;
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
   end;
 
   TRoundRectTool  = class(TTwoPointsTools)
-    Figure: TRectangle;
   public
-     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-     procedure Initialize(APanel: TPanel); override;
+    Figure: TRectangle;
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure Initialize(APanel: TPanel); override;
   end;
 
   TEllipseTool    = class(TTwoPointsTools)
-    Figure: TEllipse;
   public
+    Figure: TEllipse;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
   end;
 
   TPolygonTool = class(TTwoPointsTools)
-    Figure: TPolygon;
   public
+    Figure: TPolygon;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
     procedure Initialize(APanel: TPanel); override;
   end;
 
   TLineTool       = class(TTwoPointsTools)
-    Figure: TLine;
   public
+    Figure: TLine;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
     procedure Initialize(APanel: TPanel); override;
   end;
@@ -102,7 +101,6 @@ type
   TMagnifierTool  = class(TTwoPointsTools)
   public
     Figure: TRectangle;
-  public
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
     procedure Initialize(APanel: TPanel); override;
@@ -360,7 +358,7 @@ begin
   CornersSpinEdit.Name := 'CornersSpinEdit';
   CornersSpinEdit.Parent := APanel;
   CornersSpinEdit.Align := alBottom;
-  CornersSpinEdit.MaxValue := 100;
+  CornersSpinEdit.MaxValue := 50;
   CornersSpinEdit.MinValue := 3;
   CornersSpinEdit.Value := Corners;
   CornersSpinEdit.OnChange := @CornersSpinEditSelect;

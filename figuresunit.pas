@@ -12,59 +12,58 @@ type
 
   TFigure = class
   public
-    procedure Draw(Canvas: TCanvas); virtual; abstract;
-  public
     Points: array of TFloatPoint;
     FigurePenColor,FigureBrushColor: TColor;
+    procedure Draw(Canvas: TCanvas); virtual;
   end;
 
   TPolyline       = class(TFigure)
-  FigurePenWidth: integer;
-  FigurePenStyle: TPenStyle;
   public
+    FigurePenWidth: integer;
+    FigurePenStyle: TPenStyle;
     procedure Draw(Canvas:TCanvas); override;
   end;
 
   TRectangle      = class(TFigure)
-  FigurePenStyle: TPenStyle;
-  FigureBrushStyle: TBrushStyle;
-  FigurePenWidth: integer;
   public
+    FigurePenStyle: TPenStyle;
+    FigureBrushStyle: TBrushStyle;
+    FigurePenWidth: integer;
     procedure Draw(Canvas:TCanvas); override;
   end;
 
   TRoundRect      = class(TFigure)
-  FigurePenStyle: TPenStyle;
-  FigureBrushStyle: TBrushStyle;
-  FigurePenWidth: integer;
-  FigureR: TPoint;
   public
+    FigurePenStyle: TPenStyle;
+    FigureBrushStyle: TBrushStyle;
+    FigurePenWidth: integer;
+    FigureR: TPoint;
     procedure Draw(Canvas:TCanvas); override;
   end;
 
   TEllipse        = class(TFigure)
-  FigurePenStyle: TPenStyle;
-  FigureBrushStyle: TBrushStyle;
-  FigurePenWidth: integer;
   public
+    FigurePenStyle: TPenStyle;
+    FigureBrushStyle: TBrushStyle;
+    FigurePenWidth: integer;
     procedure Draw(Canvas:TCanvas); override;
   end;
 
   TLine           = class(TFigure)
-  FigurePenWidth: integer;
-  FigurePenStyle: TPenStyle;
   public
+    FigurePenWidth: integer;
+    FigurePenStyle: TPenStyle;
     procedure Draw(Canvas:TCanvas); override;
   end;
 
   TPolygon = class(TFigure)
-  FigurePenWidth: integer;
-  FigurePenStyle: TPenStyle;
-  FigureBrushStyle: TBrushStyle;
-  FigureCorners: integer;
-  FigureAngle: double;
-  FigureAngleMode: boolean;
   public
+    FigurePenWidth: integer;
+    FigurePenStyle: TPenStyle;
+    FigureBrushStyle: TBrushStyle;
+    FigureCorners: integer;
+    FigureAngle: double;
+    FigureAngleMode: boolean;
     procedure Draw(Canvas:TCanvas); override;
     function Rotate(P1,P2: TFloatPoint; angle: double): TFloatPoint;
   end;
@@ -92,12 +91,17 @@ var
   RectR: TPoint;
 implementation
 
+procedure TFigure.Draw(Canvas: TCanvas);
+begin
+  Canvas.Pen.Color := FigurePenColor;
+  Canvas.Brush.Color := FigureBrushColor;
+end;
+
 procedure TPolyline.Draw(Canvas: TCanvas);
 var i: integer;
 begin
-  Canvas.Pen.Color := FigurePenColor;
+  Inherited;
   Canvas.Pen.Width := FigurePenWidth;
-  Canvas.Brush.Color := clBlack;
   Canvas.Pen.Style := psSolid;
   Canvas.Brush.Style := bsSolid;
   for i := low(Points) to high(Points)-1 do
@@ -111,9 +115,8 @@ end;
 
 procedure TRectangle.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color := FigurePenColor;
+  Inherited;
   Canvas.Pen.Width := FigurePenWidth;
-  Canvas.Brush.Color := FigureBrushColor;
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := FigureBrushStyle;
   Canvas.Rectangle(scalesunit.WorldToScreen(Points[low(Points)]) .x,
@@ -124,9 +127,8 @@ end;
 
 procedure TRoundRect.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color := FigurePenColor;
+  Inherited;
   Canvas.Pen.Width := FigurePenWidth;
-  Canvas.Brush.Color := FigureBrushColor;
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := FigureBrushStyle;
   Canvas.RoundRect(scalesunit.WorldToScreen(Points[low(Points)]) .x,
@@ -139,9 +141,8 @@ end;
 
 procedure TEllipse.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color := FigurePenColor;
+  Inherited;
   Canvas.Pen.Width := FigurePenWidth;
-  Canvas.Brush.Color := FigureBrushColor;
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := FigureBrushStyle;
   Canvas.Ellipse  (scalesunit.WorldToScreen(Points[low(Points)]) .x,
@@ -152,9 +153,9 @@ end;
 
 procedure TLine.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color := FigurePenColor;
+  Inherited;
+  Canvas.Brush.Color := clWhite;
   Canvas.Pen.Width := FigurePenWidth;
-  Canvas.Brush.Color := clBlack;
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := bsSolid;
   Canvas.Line     (scalesunit.WorldToScreen(Points[low(Points)]) .x,
@@ -165,8 +166,8 @@ end;
 
 procedure THandFigure.Draw(Canvas: TCanvas);
 begin
-  Canvas.Brush.Color := clWhite;
   Canvas.Pen.Color := clBlack;
+  Canvas.Brush.Color := clWhite;
   Canvas.Pen.Style := psSolid;
   Canvas.Brush.Style := bsSolid;
   Canvas.Pen.Width := 1;
@@ -184,6 +185,7 @@ var
   PolygonPoints: array of TFloatPoint;
   PolygonPointsScr: array of TPoint;
 begin
+  Inherited;
   P1 := Points[low(Points)];
   P2 := Points[high(Points)];
   r := sqrt(abs(sqr(P2.x-P1.x) + sqr(P2.y-P1.y)));
@@ -197,9 +199,7 @@ begin
     PolygonPoints[i].y := P1.Y + r*sin(i*k/180*Pi);
     PolygonPointsScr[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],FigureAngle));
   end;
-  Canvas.Pen.Color := FigurePenColor;
   Canvas.Pen.Width := FigurePenWidth;
-  Canvas.Brush.Color := FigureBrushColor;
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := FigureBrushStyle;
   Canvas.Polygon(PolygonPointsScr);
