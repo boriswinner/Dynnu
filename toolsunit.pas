@@ -119,6 +119,8 @@ type
   public
     Figure: TRectangle;
     procedure AddPoint(APoint: TPoint); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
+    procedure Initialize(APanel: TPanel); override;
   end;
 
 var
@@ -142,15 +144,9 @@ end;
 
 procedure TPointSelectionTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
 var
-  i,j: integer;
-  tempRect: tRect;
+  i: integer;
 begin
   Inherited;
-  with Figures[high(Figures)] do
-  begin
-    SetLength(Points,2);
-    Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
-  end;
   for i := low(Figures)+1 to high(Figures)-1 do
   begin
     with Figures[i] do
@@ -266,13 +262,11 @@ end;
 procedure TRectSelectionTool.AddPoint(APoint: TPoint);
 begin
   Inherited;
-  {with Figures[high(Figures)] do begin
-    FigureRegion := CreateRectRgn (round(ScreenToWorld(Points[low(Points)]) .x),
-                                   round(ScreenToWorld(Points[low(Points)]) .y),
-                                   round(ScreenToWorld(Points[high(Points)]).x),
-                                   round(ScreenToWorld(Points[high(Points)]).y));
-  end; }
+  with Figures[high(Figures)] do begin
+    Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
+  end;
 end;
+
 procedure TPointSelectionTool.AddPoint(APoint: TPoint);
 begin
 end;
@@ -330,6 +324,30 @@ end;
 
 procedure TPointSelectionTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
 begin
+  setlength(Figures,length(Figures)-1);
+end;
+
+procedure TRectSelectionTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
+var
+  t: HRGN;
+  i: integer;
+begin
+  with Figures[high(Figures)] do
+  begin
+    FigureRegion := CreateRectRgn (WorldToScreen(Points[low(Points)]) .x,
+                                   WorldToScreen(Points[low(Points)]) .y,
+                                   WorldToScreen(Points[high(Points)]).x,
+                                   WorldToScreen(Points[high(Points)]).y);
+  end;
+  for i := low(Figures)+1 to high(Figures)-1 do
+  begin
+      Figures[i].SetRegion;
+      t := CreateRectRgn(1,1,2,2);
+      if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = false) then
+        Figures[i].Selected := true
+      else if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = true) then
+        Figures[i].Selected := false;
+  end;
   setlength(Figures,length(Figures)-1);
 end;
 
@@ -611,6 +629,9 @@ procedure TSpecificTools.Initialize(APanel: TPanel);
 begin
 end;
 procedure TMagnifierTool.Initialize(APanel: TPanel);
+begin
+end;
+procedure TRectSelectionTool.Initialize(APanel: TPanel);
 begin
 end;
 procedure TLineTool.Initialize(APanel: TPanel);
