@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
-  ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo,
+  ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo, LCL,
   figuresunit,scalesunit;
 
 type
@@ -63,6 +63,7 @@ type
   public
     Figure: TPolyline;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure Initialize(APanel: TPanel); override;
   end;
 
   TRectangleTool  = class(TTwoPointsTools)
@@ -106,6 +107,20 @@ type
     procedure Initialize(APanel: TPanel); override;
   end;
 
+  TPointSelectionTool = class(TTool)
+  public
+    Figure: TRectangle;
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure AddPoint(APoint: TPoint); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
+  end;
+
+  TRectSelectionTool = class(TTwoPointsTools)
+  public
+    Figure: TRectangle;
+    procedure AddPoint(APoint: TPoint); override;
+  end;
+
 var
   ToolsRegister: array of TTool;
   OffsetFirstPoint: TPoint;
@@ -124,6 +139,31 @@ begin
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
   end;
 end;
+
+procedure TPointSelectionTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+var
+  i,j: integer;
+  tempRect: tRect;
+begin
+  Inherited;
+  with Figures[high(Figures)] do
+  begin
+    SetLength(Points,2);
+    Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
+  end;
+  for i := low(Figures)+1 to high(Figures)-1 do
+  begin
+    with Figures[i] do
+    begin
+      SetRegion;
+      if (PtInRegion(FigureRegion,APoint.X,APoint.Y)=true) and (Selected = false) then
+        Selected := true
+      else if (PtInRegion(FigureRegion,APoint.X,APoint.Y)=true) and (Selected = true) then
+        Selected := false;
+    end;
+  end;
+end;
+
 procedure TPolylineTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
 begin
   Inherited;
@@ -219,8 +259,22 @@ begin
     SetLength(Points,2);
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
   end;
-  if (ClassName <> 'TMagnifierTool') then
+  if (ClassName <> 'TMagnifierTool') and (ClassName <> 'TSelectionTool') then
         SetMaxMinFloatPoints(ScreenToWorld(APoint));
+end;
+
+procedure TRectSelectionTool.AddPoint(APoint: TPoint);
+begin
+  Inherited;
+  {with Figures[high(Figures)] do begin
+    FigureRegion := CreateRectRgn (round(ScreenToWorld(Points[low(Points)]) .x),
+                                   round(ScreenToWorld(Points[low(Points)]) .y),
+                                   round(ScreenToWorld(Points[high(Points)]).x),
+                                   round(ScreenToWorld(Points[high(Points)]).y));
+  end; }
+end;
+procedure TPointSelectionTool.AddPoint(APoint: TPoint);
+begin
 end;
 
 procedure THandTool.AddPoint(APoint: TPoint);
@@ -272,6 +326,11 @@ begin
       end;
     setlength(Figures,length(Figures)-1);
   end;
+end;
+
+procedure TPointSelectionTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
+begin
+  setlength(Figures,length(Figures)-1);
 end;
 
 procedure THandTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
@@ -519,6 +578,10 @@ end;
 
 procedure TTool.Initialize(APanel: TPanel);
 begin
+end;
+
+procedure TPolylineTool.Initialize(APanel: TPanel);
+begin
   CreateLineWidthSpinEdit(APanel);
 end;
 
@@ -565,7 +628,8 @@ RegisterTool (TMagnifierTool.Create, TMagnifierFrame, 'Magnifier.bmp');
 RegisterTool (THandTool.Create, THandFigure, 'Hand.bmp');
 RegisterTool (TPolygonTool.Create, TPolygon, 'Polygon.bmp');
 RegisterTool (TRoundRectTool.Create, TRoundRect, 'RoundRect.bmp');
-
+RegisterTool (TRectSelectionTool.Create, TMagnifierFrame, 'Selection.bmp');
+RegisterTool (TPointSelectionTool.Create, TRectangle, 'PSelection.bmp');
 AngleMode := false;
 end.
 

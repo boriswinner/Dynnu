@@ -5,7 +5,8 @@ unit figuresunit;
 interface
 
 uses
-  Classes, SysUtils, Graphics, GraphMath, Forms, Dialogs, Math,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
+  ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo, LCL, Windows,
   scalesunit;
 type
   TFigureClass    = class  of TFigure;
@@ -14,7 +15,11 @@ type
   public
     Points: array of TFloatPoint;
     FigurePenColor,FigureBrushColor: TColor;
+    Selected: boolean;
+    FigureRegion: HRGN;
     procedure Draw(Canvas: TCanvas); virtual;
+    procedure DrawSelection(Canvas: TCanvas); virtual;
+    procedure SetRegion; virtual; abstract;
   end;
 
   TPolyline       = class(TFigure)
@@ -22,6 +27,7 @@ type
     FigurePenWidth: integer;
     FigurePenStyle: TPenStyle;
     procedure Draw(Canvas:TCanvas); override;
+    procedure SetRegion; override;
   end;
 
   TRectangle      = class(TFigure)
@@ -30,6 +36,7 @@ type
     FigureBrushStyle: TBrushStyle;
     FigurePenWidth: integer;
     procedure Draw(Canvas:TCanvas); override;
+    procedure SetRegion; override;
   end;
 
   TRoundRect      = class(TFigure)
@@ -39,6 +46,7 @@ type
     FigurePenWidth: integer;
     FigureR: TPoint;
     procedure Draw(Canvas:TCanvas); override;
+    procedure SetRegion; override;
   end;
 
   TEllipse        = class(TFigure)
@@ -47,6 +55,7 @@ type
     FigureBrushStyle: TBrushStyle;
     FigurePenWidth: integer;
     procedure Draw(Canvas:TCanvas); override;
+    procedure SetRegion; override;
   end;
 
   TLine           = class(TFigure)
@@ -54,6 +63,7 @@ type
     FigurePenWidth: integer;
     FigurePenStyle: TPenStyle;
     procedure Draw(Canvas:TCanvas); override;
+    procedure SetRegion; override;
   end;
 
   TPolygon = class(TFigure)
@@ -66,6 +76,7 @@ type
     FigureAngleMode: boolean;
     procedure Draw(Canvas:TCanvas); override;
     function Rotate(P1,P2: TFloatPoint; angle: double): TFloatPoint;
+    procedure SetRegion; override;
   end;
 
   THandFigure     = class(TFigure)
@@ -91,6 +102,22 @@ var
   RectR: TPoint;
 implementation
 
+procedure TFigure.DrawSelection(Canvas: TCanvas);
+var
+  SBr1,Hbr1,Hbr2: HBrush;
+begin
+  SBr1 := CreateSolidBrush(RGB(0, 0, 1));
+  HBr1 := CreateHatchBrush(HS_DIAGCROSS,RGB(0, 0, 255));
+  HBr2 := CreateHatchBrush(HS_DIAGCROSS,RGB(255, 0, 0));
+  SetBkColor(Canvas.Handle, RGB(0, 0, 0));
+  FillRgn (Canvas.Handle,FigureRegion,Sbr1);
+  FillRgn (Canvas.Handle,FigureRegion,HBr1);
+  FrameRgn (Canvas.Handle,FigureRegion,HBr2,3,3);
+  DeleteObject(SBr1);
+  DeleteObject(HBr1);
+  DeleteObject(Hbr2);
+end;
+
 procedure TFigure.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color := FigurePenColor;
@@ -111,6 +138,11 @@ begin
                    scalesunit.WorldToScreen(Points[i+1]).x,
                    scalesunit.WorldToScreen(Points[i+1]).y);
   end;
+  if (Selected = true) then
+  begin
+    SetRegion;
+    DrawSelection(Canvas);
+  end;
 end;
 
 procedure TRectangle.Draw(Canvas: TCanvas);
@@ -123,6 +155,11 @@ begin
                    scalesunit.WorldToScreen(Points[low(Points)]) .y,
                    scalesunit.WorldToScreen(Points[high(Points)]).x,
                    scalesunit.WorldToScreen(Points[high(Points)]).y);
+  if (Selected = true) then
+  begin
+    SetRegion;
+    DrawSelection(Canvas);
+  end;
 end;
 
 procedure TRoundRect.Draw(Canvas: TCanvas);
@@ -137,6 +174,11 @@ begin
                    scalesunit.WorldToScreen(Points[high(Points)]).y,
                    FigureR.x,
                    FigureR.y);
+  if (Selected = true) then
+  begin
+    SetRegion;
+    DrawSelection(Canvas);
+  end;
 end;
 
 procedure TEllipse.Draw(Canvas: TCanvas);
@@ -149,6 +191,11 @@ begin
                    scalesunit.WorldToScreen(Points[low(Points)]) .y,
                    scalesunit.WorldToScreen(Points[high(Points)]).x,
                    scalesunit.WorldToScreen(Points[high(Points)]).y);
+  if (Selected = true) then
+  begin
+    SetRegion;
+    DrawSelection(Canvas);
+  end;
 end;
 
 procedure TLine.Draw(Canvas: TCanvas);
@@ -162,6 +209,11 @@ begin
                    scalesunit.WorldToScreen(Points[low(Points)]) .y,
                    scalesunit.WorldToScreen(Points[high(Points)]).x,
                    scalesunit.WorldToScreen(Points[high(Points)]).y);
+  if (Selected = true) then
+  begin
+    SetRegion;
+    DrawSelection(Canvas);
+  end;
 end;
 
 procedure THandFigure.Draw(Canvas: TCanvas);
@@ -203,6 +255,11 @@ begin
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := FigureBrushStyle;
   Canvas.Polygon(PolygonPointsScr);
+  if (Selected = true) then
+  begin
+    FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],length(PolygonPointsScr),winding);
+    DrawSelection(Canvas);
+  end;
 end;
 
 procedure TMagnifierFrame.Draw(Canvas: TCanvas);
@@ -221,6 +278,126 @@ function TPolygon.Rotate(P1,P2: TFloatPoint; angle: double): TFloatPoint;
 begin
   Result.x := P1.x+(P2.x-P1.x)*cos(angle)-(P2.Y-P1.Y)*sin(angle);
   Result.Y := P1.y+(P2.x-P1.x)*sin(angle)+(P2.Y-P1.Y)*cos(angle);
+end;
+
+procedure TRectangle.SetRegion;
+var
+  tempRect: TRect;
+begin
+  tempRect.TopLeft := WorldToScreen(Points[low(Points)]);
+  tempRect.BottomRight := WorldToScreen(Points[high(Points)]);
+  FigureRegion := CreateRectRgn (tempRect.Left,tempRect.Top,tempRect.Right,tempRect.Bottom);
+end;
+
+procedure TEllipse.SetRegion;
+var
+  tempRect: TRect;
+begin
+  tempRect.TopLeft := WorldToScreen(Points[low(Points)]);
+  tempRect.BottomRight := WorldToScreen(Points[high(Points)]);
+  FigureRegion := CreateEllipticRgn (tempRect.Left,tempRect.Top,tempRect.Right,tempRect.Bottom);
+end;
+
+procedure TRoundRect.SetRegion;
+var
+  tempRect: TRect;
+begin
+  tempRect.TopLeft := WorldToScreen(Points[low(Points)]);
+  tempRect.BottomRight := WorldToScreen(Points[high(Points)]);
+  FigureRegion := CreateRoundRectRgn (tempRect.Left,tempRect.Top,tempRect.Right,tempRect.Bottom,RectR.x,RectR.y);
+end;
+
+procedure TLine.SetRegion;
+var
+  tempPoints: array[0..3] of TPoint;
+  p1,p2: TPoint;
+begin
+  p1 := WorldToScreen(Points[low(Points)]);
+  p2 := WorldToScreen(Points[high(Points)]);
+  if (abs(p2.x-p1.x)>15) then
+  begin
+    tempPoints[0].x := p1.x-FigurePenWidth div 2;
+    tempPoints[0].y := p1.y-5-FigurePenWidth;
+    tempPoints[1].x := p2.x+FigurePenWidth div 2;
+    tempPoints[1].y := p2.y-5-FigurePenWidth;
+    tempPoints[2].x := p2.x+FigurePenWidth div 2;
+    tempPoints[2].y := p2.y+5+FigurePenWidth;
+    tempPoints[3].x := p1.x-FigurePenWidth div 2;
+    tempPoints[3].y := p1.y+5+FigurePenWidth;
+  end else
+  begin
+    tempPoints[0].x := p1.x-5-FigurePenWidth;
+    tempPoints[0].y := p1.y-FigurePenWidth div 2;
+    tempPoints[1].x := p2.x-5-FigurePenWidth;
+    tempPoints[1].y := p2.y+FigurePenWidth div 2;
+    tempPoints[2].x := p2.x+5+FigurePenWidth;
+    tempPoints[2].y := p2.y+FigurePenWidth div 2;
+    tempPoints[3].x := p1.x+5+FigurePenWidth;
+    tempPoints[3].y := p1.y-FigurePenWidth div 2;
+  end;
+  FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
+end;
+
+procedure TPolyline.SetRegion;
+var
+  tempPoints: array[0..3] of TPoint;
+  p1,p2: TPoint;
+  curRgn: HRGN;
+  i: integer;
+begin
+  for i := low(Points) to high(Points)-1 do
+  begin
+    p1 := WorldToScreen(Points[i]);
+    p2 := WorldToScreen(Points[i+1]);
+    if (abs(p2.x-p1.x)>15) then
+    begin
+      tempPoints[0].x := p1.x-FigurePenWidth div 2;
+      tempPoints[0].y := p1.y-5-FigurePenWidth;
+      tempPoints[1].x := p2.x+FigurePenWidth div 2;
+      tempPoints[1].y := p2.y-5-FigurePenWidth;
+      tempPoints[2].x := p2.x+FigurePenWidth div 2;
+      tempPoints[2].y := p2.y+5+FigurePenWidth;
+      tempPoints[3].x := p1.x-FigurePenWidth div 2;
+      tempPoints[3].y := p1.y+5+FigurePenWidth;
+    end else
+    begin
+      tempPoints[0].x := p1.x-5-FigurePenWidth;
+      tempPoints[0].y := p1.y-FigurePenWidth div 2;
+      tempPoints[1].x := p2.x-5-FigurePenWidth;
+      tempPoints[1].y := p2.y+FigurePenWidth div 2;
+      tempPoints[2].x := p2.x+5+FigurePenWidth;
+      tempPoints[2].y := p2.y+FigurePenWidth div 2;
+      tempPoints[3].x := p1.x+5+FigurePenWidth;
+      tempPoints[3].y := p1.y-FigurePenWidth div 2;
+    end;
+    if (i=low(Points)) then FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
+    curRgn := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
+    CombineRgn (FigureRegion,FigureRegion,curRgn,RGN_OR);
+  end;
+end;
+
+procedure TPolygon.SetRegion;
+var
+  P1,P2: TFloatPoint;
+  r: double;
+  i,k: integer;
+  PolygonPoints: array of TFloatPoint;
+  PolygonPointsScr: array of TPoint;
+begin
+  P1 := Points[low(Points)];
+  P2 := Points[high(Points)];
+  r := sqrt(abs(sqr(P2.x-P1.x) + sqr(P2.y-P1.y)));
+  k:=360 div FigureCorners;
+  if (not FigureAngleMode) then FigureAngle := Arctan2(p1.Y - p2.Y, p1.X - p2.X);
+  setlength (PolygonPoints, Figurecorners);
+  setlength (PolygonPointsScr, Figurecorners);
+  for i := low(PolygonPoints) to high(PolygonPoints) do
+  begin
+    PolygonPoints[i].x := P1.x + r*cos(i*k/180*Pi);
+    PolygonPoints[i].y := P1.Y + r*sin(i*k/180*Pi);
+    PolygonPointsScr[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],FigureAngle));
+  end;
+  FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],length(PolygonPointsScr),winding);
 end;
 
 initialization
