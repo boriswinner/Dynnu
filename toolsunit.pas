@@ -311,21 +311,20 @@ begin
      mode := false else mode := true;
   end;
 
-  if (not CtrlBtn) then
-  begin
-    for i := high(Figures)-1 downto low(Figures)+1  do
-    begin
-      with Figures[i] do
-      begin
-        if (PtInRegion(FigureRegion,X,Y)=false) then
-            Selected := false;
-      end;
-    end;
-  end;
-
   case mode of
   true:
   begin
+    if (not CtrlBtn) then
+    begin
+      for i := high(Figures)-1 downto low(Figures)+1  do
+      begin
+        with Figures[i] do
+        begin
+          if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION) then
+              Selected := false;
+        end;
+      end;
+    end;
     for i := low(Figures)+1 to high(Figures)-1 do
     begin
         DeleteObject(Figures[i].FigureRegion);
@@ -340,6 +339,17 @@ begin
   end;
   false:
   begin
+      if (not CtrlBtn) then
+      begin
+        for i := high(Figures)-1 downto low(Figures)+1  do
+        begin
+          with Figures[i] do
+          begin
+            if (PtInRegion(FigureRegion,X,Y)=false) then
+                Selected := false;
+          end;
+        end;
+      end;
       for i := high(Figures)-1 downto low(Figures)+1  do
       begin
         with Figures[i] do
