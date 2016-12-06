@@ -10,6 +10,7 @@ uses
   scalesunit;
 type
   TFigureClass    = class  of TFigure;
+  tempPointsArray = array[0..3] of TPoint;
 
   TFigure = class
   public
@@ -89,6 +90,8 @@ type
     procedure Draw(Canvas: TCanvas); override;
   end;
 
+  function CreateRectAroundLine(p1,p2: TPoint; FigurePenWidth: integer): tempPointsArray;
+
 var
   Figures: array of TFigure;
   PenColor,BrushColor: TColor;
@@ -101,6 +104,30 @@ var
   Angle: double;
   RectR: TPoint;
 implementation
+function CreateRectAroundLine(p1,p2: TPoint; FigurePenWidth: integer): tempPointsArray;
+begin
+  if (abs(p2.x-p1.x)>45) then
+  begin
+    Result[0].x := p1.x-FigurePenWidth div 2;
+    Result[0].y := p1.y-5-FigurePenWidth;
+    Result[1].x := p2.x+FigurePenWidth div 2;
+    Result[1].y := p2.y-5-FigurePenWidth;
+    Result[2].x := p2.x+FigurePenWidth div 2;
+    Result[2].y := p2.y+5+FigurePenWidth;
+    Result[3].x := p1.x-FigurePenWidth div 2;
+    Result[3].y := p1.y+5+FigurePenWidth;
+  end else
+  begin
+    Result[0].x := p1.x-5-FigurePenWidth;
+    Result[0].y := p1.y-FigurePenWidth div 2;
+    Result[1].x := p2.x-5-FigurePenWidth;
+    Result[1].y := p2.y+FigurePenWidth div 2;
+    Result[2].x := p2.x+5+FigurePenWidth;
+    Result[2].y := p2.y+FigurePenWidth div 2;
+    Result[3].x := p1.x+5+FigurePenWidth;
+    Result[3].y := p1.y-FigurePenWidth div 2;
+  end;
+end;
 
 procedure TFigure.DrawSelection(Pt1,Pt2: TPoint; Canvas: TCanvas);
 var
@@ -335,32 +362,12 @@ end;
 
 procedure TLine.SetRegion;
 var
-  tempPoints: array[0..3] of TPoint;
+  tempPoints: tempPointsArray;
   p1,p2: TPoint;
 begin
   p1 := WorldToScreen(Points[low(Points)]);
   p2 := WorldToScreen(Points[high(Points)]);
-  if (abs(p2.x-p1.x)>45) then
-  begin
-    tempPoints[0].x := p1.x-FigurePenWidth div 2;
-    tempPoints[0].y := p1.y-5-FigurePenWidth;
-    tempPoints[1].x := p2.x+FigurePenWidth div 2;
-    tempPoints[1].y := p2.y-5-FigurePenWidth;
-    tempPoints[2].x := p2.x+FigurePenWidth div 2;
-    tempPoints[2].y := p2.y+5+FigurePenWidth;
-    tempPoints[3].x := p1.x-FigurePenWidth div 2;
-    tempPoints[3].y := p1.y+5+FigurePenWidth;
-  end else
-  begin
-    tempPoints[0].x := p1.x-5-FigurePenWidth;
-    tempPoints[0].y := p1.y-FigurePenWidth div 2;
-    tempPoints[1].x := p2.x-5-FigurePenWidth;
-    tempPoints[1].y := p2.y+FigurePenWidth div 2;
-    tempPoints[2].x := p2.x+5+FigurePenWidth;
-    tempPoints[2].y := p2.y+FigurePenWidth div 2;
-    tempPoints[3].x := p1.x+5+FigurePenWidth;
-    tempPoints[3].y := p1.y-FigurePenWidth div 2;
-  end;
+  tempPoints := CreateRectAroundLine(p1,p2,FigurePenWidth);
   FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
 end;
 
@@ -375,27 +382,7 @@ begin
   begin
     p1 := WorldToScreen(Points[i]);
     p2 := WorldToScreen(Points[i+1]);
-    if (abs(p2.x-p1.x)>45) then
-    begin
-      tempPoints[0].x := p1.x-FigurePenWidth div 2;
-      tempPoints[0].y := p1.y-5-FigurePenWidth;
-      tempPoints[1].x := p2.x+FigurePenWidth div 2;
-      tempPoints[1].y := p2.y-5-FigurePenWidth;
-      tempPoints[2].x := p2.x+FigurePenWidth div 2;
-      tempPoints[2].y := p2.y+5+FigurePenWidth;
-      tempPoints[3].x := p1.x-FigurePenWidth div 2;
-      tempPoints[3].y := p1.y+5+FigurePenWidth;
-    end else
-    begin
-      tempPoints[0].x := p1.x-5-FigurePenWidth;
-      tempPoints[0].y := p1.y-FigurePenWidth div 2;
-      tempPoints[1].x := p2.x-5-FigurePenWidth;
-      tempPoints[1].y := p2.y+FigurePenWidth div 2;
-      tempPoints[2].x := p2.x+5+FigurePenWidth;
-      tempPoints[2].y := p2.y+FigurePenWidth div 2;
-      tempPoints[3].x := p1.x+5+FigurePenWidth;
-      tempPoints[3].y := p1.y-FigurePenWidth div 2;
-    end;
+    tempPoints := CreateRectAroundLine(p1,p2,FigurePenWidth);
     if (i=low(Points)) then FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
     curRgn := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
     CombineRgn (FigureRegion,FigureRegion,curRgn,RGN_OR);
