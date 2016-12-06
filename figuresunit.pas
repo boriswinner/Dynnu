@@ -11,6 +11,7 @@ uses
 type
   TFigureClass    = class  of TFigure;
   tempPointsArray = array[0..3] of TPoint;
+  PolygonPointsArray = array of TPoint;
 
   TFigure = class
   public
@@ -77,6 +78,7 @@ type
     FigureAngleMode: boolean;
     procedure Draw(Canvas:TCanvas); override;
     function Rotate(P1,P2: TFloatPoint; angle: double): TFloatPoint;
+    function CreatePolygon (P1,P2: TFloatPoint; AFigureCorners: integer; AFigureAngle: double; AFigureAngleMode: boolean): PolygonPointsArray;
     procedure SetRegion; override;
   end;
 
@@ -280,25 +282,13 @@ end;
 procedure TPolygon.Draw(Canvas: TCanvas);
 var
   P1,P2: TFloatPoint;
-  r: double;
-  i,k: integer;
-  PolygonPoints: array of TFloatPoint;
-  PolygonPointsScr: array of TPoint;
+  i: integer;
+  PolygonPointsScr: PolygonPointsArray;
 begin
   Inherited;
   P1 := Points[low(Points)];
   P2 := Points[high(Points)];
-  r := sqrt(abs(sqr(P2.x-P1.x) + sqr(P2.y-P1.y)));
-  k:=360 div FigureCorners;
-  if (not FigureAngleMode) then FigureAngle := Arctan2(p1.Y - p2.Y, p1.X - p2.X);
-  setlength (PolygonPoints, Figurecorners);
-  setlength (PolygonPointsScr, Figurecorners);
-  for i := low(PolygonPoints) to high(PolygonPoints) do
-  begin
-    PolygonPoints[i].x := P1.x + r*cos(i*k/180*Pi);
-    PolygonPoints[i].y := P1.Y + r*sin(i*k/180*Pi);
-    PolygonPointsScr[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],FigureAngle));
-  end;
+  PolygonPointsScr := CreatePolygon(P1,P2,FigureCorners,FigureAngle,FigureAngleMode);
   Canvas.Pen.Width := FigurePenWidth;
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := FigureBrushStyle;
@@ -393,25 +383,33 @@ end;
 procedure TPolygon.SetRegion;
 var
   P1,P2: TFloatPoint;
+  PolygonPointsScr: PolygonPointsArray;
+begin
+  P1 := Points[low(Points)];
+  P2 := Points[high(Points)];
+  PolygonPointsScr := CreatePolygon(P1,P2,FigureCorners,FigureAngle,FigureAngleMode);
+  FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],length(PolygonPointsScr),winding);
+end;
+
+function TPolygon.CreatePolygon (P1,P2: TFloatPoint; AFigureCorners: integer;
+  AFigureAngle: double; AFigureAngleMode: boolean): PolygonPointsArray;
+var
   r: double;
   i,k: integer;
   PolygonPoints: array of TFloatPoint;
   PolygonPointsScr: array of TPoint;
 begin
-  P1 := Points[low(Points)];
-  P2 := Points[high(Points)];
   r := sqrt(abs(sqr(P2.x-P1.x) + sqr(P2.y-P1.y)));
-  k:=360 div FigureCorners;
-  if (not FigureAngleMode) then FigureAngle := Arctan2(p1.Y - p2.Y, p1.X - p2.X);
-  setlength (PolygonPoints, Figurecorners);
-  setlength (PolygonPointsScr, Figurecorners);
+  k:=360 div AFigureCorners;
+  if (not AFigureAngleMode) then AFigureAngle := Arctan2(p1.Y - p2.Y, p1.X - p2.X);
+  setlength (PolygonPoints, AFigurecorners);
+  setlength (Result, AFigurecorners);
   for i := low(PolygonPoints) to high(PolygonPoints) do
   begin
     PolygonPoints[i].x := P1.x + r*cos(i*k/180*Pi);
     PolygonPoints[i].y := P1.Y + r*sin(i*k/180*Pi);
-    PolygonPointsScr[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],FigureAngle));
+    Result[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],AFigureAngle));
   end;
-  FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],length(PolygonPointsScr),winding);
 end;
 
 initialization
