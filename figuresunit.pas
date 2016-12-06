@@ -18,7 +18,7 @@ type
     Selected: boolean;
     FigureRegion: HRGN;
     procedure Draw(Canvas: TCanvas); virtual;
-    procedure DrawSelection(Canvas: TCanvas); virtual;
+    procedure DrawSelection(Pt1,Pt2: TPoint; Canvas: TCanvas); virtual;
     procedure SetRegion; virtual; abstract;
   end;
 
@@ -102,20 +102,40 @@ var
   RectR: TPoint;
 implementation
 
-procedure TFigure.DrawSelection(Canvas: TCanvas);
+procedure TFigure.DrawSelection(Pt1,Pt2: TPoint; Canvas: TCanvas);
 var
-  SBr1,Hbr1,Hbr2: HBrush;
+  lP,hP: TPoint;
 begin
-  SBr1 := CreateSolidBrush(RGB(0, 0, 1));
-  HBr1 := CreateHatchBrush(HS_DIAGCROSS,RGB(0, 0, 255));
-  HBr2 := CreateHatchBrush(HS_DIAGCROSS,RGB(255, 0, 0));
-  SetBkColor(Canvas.Handle, RGB(0, 0, 0));
-  FillRgn (Canvas.Handle,FigureRegion,Sbr1);
-  FillRgn (Canvas.Handle,FigureRegion,HBr1);
-  FrameRgn (Canvas.Handle,FigureRegion,HBr2,3,3);
-  DeleteObject(SBr1);
-  DeleteObject(HBr1);
-  DeleteObject(Hbr2);
+  Canvas.Pen.Color := clBlack;
+  Canvas.Brush.Color := clWhite;
+  Canvas.Pen.Style := psSolid;
+  Canvas.Brush.Style := bsSolid;
+  Canvas.Pen.Width := 1;
+  lP.x := min(WorldToScreen(Pt1).x,WorldToScreen(Pt2).x);
+  lP.y := min(WorldToScreen(Pt1).y,WorldToScreen(Pt2).y);
+  hP.x := max(WorldToScreen(Pt1).x,WorldToScreen(Pt2).x);
+  hP.y := max(WorldToScreen(Pt1).y,WorldToScreen(Pt2).y);
+  Canvas.Ellipse(lp.X-5,
+                 lP.y-5,
+                 lP.x+5,
+                 lP.y+5);
+  Canvas.Ellipse(hP.x-5,
+                 hP.y-5,
+                 hP.x+5,
+                 hP.y+5);
+  Canvas.Ellipse(hP.x-5,
+                 lP.y-5,
+                 hP.x+5,
+                 lP.y+5);
+  Canvas.Ellipse(lP.x-5,
+                 hP.y-5,
+                 lP.x+5,
+                 hP.y+5);
+  Canvas.Pen.Style := psDash;
+  Canvas.Frame  (lP.x-5,
+                 lP.y-5,
+                 hP.x+5,
+                 hP.y+5);
 end;
 
 procedure TFigure.Draw(Canvas: TCanvas);
@@ -141,8 +161,8 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    SetRegion;
-    DrawSelection(Canvas);
+    for i := low(Points) to high(Points)-1 do
+      DrawSelection(Points[i],Points[i+1],Canvas);
   end;
 end;
 
@@ -159,8 +179,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    SetRegion;
-    DrawSelection(Canvas);
+    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
   end;
 end;
 
@@ -179,8 +198,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    SetRegion;
-    DrawSelection(Canvas);
+    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
   end;
 end;
 
@@ -197,8 +215,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    SetRegion;
-    DrawSelection(Canvas);
+    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
   end;
 end;
 
@@ -216,8 +233,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    SetRegion;
-    DrawSelection(Canvas);
+    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
   end;
 end;
 
@@ -263,8 +279,12 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],length(PolygonPointsScr),winding);
-    DrawSelection(Canvas);
+    for i := low(PolygonPointsScr) to high(PolygonPointsScr)-1 do
+      DrawSelection(ScreenToWorld(PolygonPointsScr[i]),
+      ScreenToWorld(PolygonPointsScr[i+1]),Canvas);
+
+    DrawSelection(ScreenToWorld(PolygonPointsScr[high(PolygonPointsScr)]),
+    ScreenToWorld(PolygonPointsScr[low(PolygonPointsScr)]),Canvas);
   end;
 end;
 
