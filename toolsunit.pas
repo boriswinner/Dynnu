@@ -673,5 +673,6 @@ RegisterTool (TPolygonTool.Create, TPolygon, 'Polygon.bmp');
 RegisterTool (TRoundRectTool.Create, TRoundRect, 'RoundRect.bmp');
 RegisterTool (TRectSelectionTool.Create, TMagnifierFrame, 'Selection.bmp');
 AngleMode := false;
+RectR := Point(50,50);
 end.
 
