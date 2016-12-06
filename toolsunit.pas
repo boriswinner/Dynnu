@@ -107,14 +107,6 @@ type
     procedure Initialize(APanel: TPanel); override;
   end;
 
-  TPointSelectionTool = class(TTool)
-  public
-    Figure: TRectangle;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure AddPoint(APoint: TPoint); override;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
-  end;
-
   TRectSelectionTool = class(TTwoPointsTools)
   public
     Figure: TRectangle;
@@ -128,6 +120,7 @@ var
   OffsetFirstPoint: TPoint;
   AngleSpinEdit: TSpinEdit;
   AngleMode: boolean;
+  CtrlBtn: boolean;
 implementation
 
 procedure TTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
@@ -139,25 +132,6 @@ begin
     FigureBrushColor := BrushColor;
     SetLength(Points,1);
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
-  end;
-end;
-
-procedure TPointSelectionTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-var
-  i: integer;
-begin
-  Inherited;
-  for i := low(Figures)+1 to high(Figures)-1 do
-  begin
-    with Figures[i] do
-    begin
-      DeleteObject(FigureRegion);
-      SetRegion;
-      if (PtInRegion(FigureRegion,APoint.X,APoint.Y)=true) and (Selected = false) then
-        Selected := true
-      else if (PtInRegion(FigureRegion,APoint.X,APoint.Y)=true) and (Selected = true) then
-        Selected := false;
-    end;
   end;
 end;
 
@@ -268,9 +242,6 @@ begin
   end;
 end;
 
-procedure TPointSelectionTool.AddPoint(APoint: TPoint);
-begin
-end;
 
 procedure THandTool.AddPoint(APoint: TPoint);
 begin
@@ -323,15 +294,11 @@ begin
   end;
 end;
 
-procedure TPointSelectionTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
-begin
-  setlength(Figures,length(Figures)-1);
-end;
-
 procedure TRectSelectionTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
 var
   t: HRGN;
   i: integer;
+  mode: boolean;
 begin
   with Figures[high(Figures)] do
   begin
@@ -339,17 +306,59 @@ begin
                                    WorldToScreen(Points[low(Points)]) .y,
                                    WorldToScreen(Points[high(Points)]).x,
                                    WorldToScreen(Points[high(Points)]).y);
+    if (abs(WorldToScreen(Points[low(Points)]) .x -
+        WorldToScreen(Points[high(Points)]).x) < 5) then
+     mode := false else mode := true;
   end;
-  for i := low(Figures)+1 to high(Figures)-1 do
+
+  if (not CtrlBtn) then
   begin
-      DeleteObject(Figures[i].FigureRegion);
-      Figures[i].SetRegion;
-      t := CreateRectRgn(1,1,2,2);
-      if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = false) then
-        Figures[i].Selected := true
-      else if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = true) then
-        Figures[i].Selected := false;
-      DeleteObject(t);
+    for i := high(Figures)-1 downto low(Figures)+1  do
+    begin
+      with Figures[i] do
+      begin
+        if (PtInRegion(FigureRegion,X,Y)=false) then
+            Selected := false;
+      end;
+    end;
+  end;
+
+  case mode of
+  true:
+  begin
+    for i := low(Figures)+1 to high(Figures)-1 do
+    begin
+        DeleteObject(Figures[i].FigureRegion);
+        Figures[i].SetRegion;
+        t := CreateRectRgn(1,1,2,2);
+        if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = false) then
+          Figures[i].Selected := true
+        else if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = true) then
+          Figures[i].Selected := false;
+        DeleteObject(t);
+    end;
+  end;
+  false:
+  begin
+      for i := high(Figures)-1 downto low(Figures)+1  do
+      begin
+        with Figures[i] do
+        begin
+          DeleteObject(FigureRegion);
+          SetRegion;
+          if (PtInRegion(FigureRegion,X,Y)=true) and (Selected = false) then
+          begin
+            Selected := true;
+            break;
+          end
+          else if (PtInRegion(FigureRegion,X,Y)=true) and (Selected = true) then
+          begin
+            Selected := false;
+            break;
+          end;
+        end;
+      end;
+  end;
   end;
   setlength(Figures,length(Figures)-1);
 end;
@@ -653,7 +662,6 @@ RegisterTool (THandTool.Create, THandFigure, 'Hand.bmp');
 RegisterTool (TPolygonTool.Create, TPolygon, 'Polygon.bmp');
 RegisterTool (TRoundRectTool.Create, TRoundRect, 'RoundRect.bmp');
 RegisterTool (TRectSelectionTool.Create, TMagnifierFrame, 'Selection.bmp');
-RegisterTool (TPointSelectionTool.Create, TRectangle, 'PSelection.bmp');
 AngleMode := false;
 end.
 

@@ -13,6 +13,7 @@ object MainForm: TMainForm
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
+  OnKeyUp = FormKeyUp
   Position = poScreenCenter
   LCLVersion = '1.6.0.4'
   object PaintPanel: TPanel

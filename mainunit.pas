@@ -41,6 +41,7 @@ type
     procedure AntiAliasingComboBoxChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ScrollBarScroll(Sender: TObject;
       ScrollCode: TScrollCode; var ScrollPos: Integer);
     procedure MainPaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
@@ -104,6 +105,7 @@ begin
   Zoom                        := 100;
   scalesunit.PaintBoxSize.x   := MainPaintBox.Width;
   scalesunit.PaintBoxSize.y   := MainPaintBox.Height;
+  CtrlBtn:=false;
 
   ColorLabel1.Color := PenColor;
   ColorLabel2.Color := BrushColor;
@@ -184,6 +186,15 @@ begin
     ZoomSpinEdit.Value := ZoomSpinEdit.Value + 10;
   if (key=VK_SUBTRACT) or (key=VK_OEM_MINUS) then
     ZoomSpinEdit.Value := ZoomSpinEdit.Value - 10;
+  if (key=VK_CONTROL) then
+    CtrlBtn:= true;
+end;
+
+procedure TMainForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
+  );
+begin
+  if (key=VK_CONTROL) then
+    CtrlBtn:= false;
 end;
 
 procedure TMainForm.ScrollBarScroll(Sender: TObject;
