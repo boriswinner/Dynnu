@@ -151,6 +151,7 @@ begin
   begin
     with Figures[i] do
     begin
+      DeleteObject(FigureRegion);
       SetRegion;
       if (PtInRegion(FigureRegion,APoint.X,APoint.Y)=true) and (Selected = false) then
         Selected := true

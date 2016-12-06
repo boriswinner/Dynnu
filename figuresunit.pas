@@ -140,6 +140,7 @@ begin
   end;
   if (Selected = true) then
   begin
+    DeleteObject(FigureRegion);
     SetRegion;
     DrawSelection(Canvas);
   end;
@@ -157,6 +158,7 @@ begin
                    scalesunit.WorldToScreen(Points[high(Points)]).y);
   if (Selected = true) then
   begin
+    DeleteObject(FigureRegion);
     SetRegion;
     DrawSelection(Canvas);
   end;
@@ -176,6 +178,7 @@ begin
                    FigureR.y);
   if (Selected = true) then
   begin
+    DeleteObject(FigureRegion);
     SetRegion;
     DrawSelection(Canvas);
   end;
@@ -193,6 +196,7 @@ begin
                    scalesunit.WorldToScreen(Points[high(Points)]).y);
   if (Selected = true) then
   begin
+    DeleteObject(FigureRegion);
     SetRegion;
     DrawSelection(Canvas);
   end;
@@ -211,6 +215,7 @@ begin
                    scalesunit.WorldToScreen(Points[high(Points)]).y);
   if (Selected = true) then
   begin
+    DeleteObject(FigureRegion);
     SetRegion;
     DrawSelection(Canvas);
   end;
@@ -257,6 +262,7 @@ begin
   Canvas.Polygon(PolygonPointsScr);
   if (Selected = true) then
   begin
+    DeleteObject(FigureRegion);
     FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],length(PolygonPointsScr),winding);
     DrawSelection(Canvas);
   end;
@@ -314,7 +320,7 @@ var
 begin
   p1 := WorldToScreen(Points[low(Points)]);
   p2 := WorldToScreen(Points[high(Points)]);
-  if (abs(p2.x-p1.x)>15) then
+  if (abs(p2.x-p1.x)>45) then
   begin
     tempPoints[0].x := p1.x-FigurePenWidth div 2;
     tempPoints[0].y := p1.y-5-FigurePenWidth;
@@ -349,7 +355,7 @@ begin
   begin
     p1 := WorldToScreen(Points[i]);
     p2 := WorldToScreen(Points[i+1]);
-    if (abs(p2.x-p1.x)>15) then
+    if (abs(p2.x-p1.x)>45) then
     begin
       tempPoints[0].x := p1.x-FigurePenWidth div 2;
       tempPoints[0].y := p1.y-5-FigurePenWidth;
@@ -373,6 +379,7 @@ begin
     if (i=low(Points)) then FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
     curRgn := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
     CombineRgn (FigureRegion,FigureRegion,curRgn,RGN_OR);
+    DeleteObject(curRgn);
   end;
 end;
 
