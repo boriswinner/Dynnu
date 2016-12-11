@@ -719,7 +719,7 @@ begin
   Parameters[1] := TLineStyleParameter;
   Parameters[2] := TFillStyleParameter;
   Parameters[3] := TRoundingXParameter;
-  Parameters[4] := TRoundingXParameter;
+  Parameters[4] := TRoundingYParameter;
 end;
 
 procedure TTool.Initialize(APanel: TPanel);

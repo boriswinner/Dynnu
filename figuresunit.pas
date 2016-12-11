@@ -94,6 +94,8 @@ type
 
   function CreateRectAroundLine(p1,p2: TPoint; FigurePenWidth: integer): tempPointsArray;
 
+const
+  inf:integer = 2147483647;
 var
   Figures: array of TFigure;
   PenColor,BrushColor: TColor;
@@ -140,10 +142,10 @@ begin
   Canvas.Pen.Style := psSolid;
   Canvas.Brush.Style := bsSolid;
   Canvas.Pen.Width := 1;
-  lP.x := min(WorldToScreen(Pt1).x,WorldToScreen(Pt2).x);
-  lP.y := min(WorldToScreen(Pt1).y,WorldToScreen(Pt2).y);
-  hP.x := max(WorldToScreen(Pt1).x,WorldToScreen(Pt2).x);
-  hP.y := max(WorldToScreen(Pt1).y,WorldToScreen(Pt2).y);
+  lP.x := min(Pt1.x,Pt2.x);
+  lP.y := min(Pt1.y,Pt2.y);
+  hP.x := max(Pt1.x,Pt2.x);
+  hP.y := max(Pt1.y,Pt2.y);
   Canvas.Ellipse(lp.X-5,
                  lP.y-5,
                  lP.x+5,
@@ -173,13 +175,20 @@ begin
   Canvas.Brush.Color := FigureBrushColor;
 end;
 
+
 procedure TPolyline.Draw(Canvas: TCanvas);
-var i: integer;
+var
+  i: integer;
+  lP,hP: TPoint;
 begin
   Inherited;
   Canvas.Pen.Width := FigurePenWidth;
   Canvas.Pen.Style := psSolid;
   Canvas.Brush.Style := bsSolid;
+  lP.x := 0;
+  lP.y := 0;
+  hP.x := inf;
+  hP.y := inf;
   for i := low(Points) to high(Points)-1 do
   begin
     Canvas.Line   (scalesunit.WorldToScreen(Points[i])  .x,
@@ -187,11 +196,17 @@ begin
                    scalesunit.WorldToScreen(Points[i+1]).x,
                    scalesunit.WorldToScreen(Points[i+1]).y);
   end;
+  for i := low(Points) to High(Points) do
+  begin
+    if (lP.x < WorldToScreen(Points[i]).x) then lP.x := WorldToScreen(Points[i]).x;
+    if (lP.y < WorldToScreen(Points[i]).y) then lP.y := WorldToScreen(Points[i]).y;
+    if (hP.x > WorldToScreen(Points[i]).x) then hP.x := WorldToScreen(Points[i]).x;
+    if (hP.y > WorldToScreen(Points[i]).y) then hP.y := WorldToScreen(Points[i]).y;
+  end;
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    for i := low(Points) to high(Points)-1 do
-      DrawSelection(Points[i],Points[i+1],Canvas);
+    DrawSelection(lP,hP,Canvas);
   end;
 end;
 
@@ -208,7 +223,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -227,7 +242,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -244,7 +259,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -262,7 +277,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(Points[low(Points)],Points[high(Points)],Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -284,11 +299,23 @@ var
   P1,P2: TFloatPoint;
   i: integer;
   PolygonPointsScr: PolygonPointsArray;
+  lP,hP: TFloatPoint;
 begin
   Inherited;
   P1 := Points[low(Points)];
   P2 := Points[high(Points)];
+  lP.x := 0;
+  lP.y := 0;
+  hP.x := inf;
+  hP.y := inf;
   PolygonPointsScr := CreatePolygon(P1,P2,FigureCorners,FigureAngle,FigureAngleMode);
+  for i := low(PolygonPointsScr) to high (PolygonPointsScr) do
+  begin
+    if (lP.x < PolygonPointsScr[i].x) then lP.x := PolygonPointsScr[i].x;
+    if (lP.y < PolygonPointsScr[i].y) then lP.y := PolygonPointsScr[i].y;
+    if (hP.x > PolygonPointsScr[i].x) then hP.x := PolygonPointsScr[i].x;
+    if (hP.y > PolygonPointsScr[i].y) then hP.y := PolygonPointsScr[i].y;
+  end;
   Canvas.Pen.Width := FigurePenWidth;
   Canvas.Pen.Style := FigurePenStyle;
   Canvas.Brush.Style := FigureBrushStyle;
@@ -296,12 +323,7 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    for i := low(PolygonPointsScr) to high(PolygonPointsScr)-1 do
-      DrawSelection(ScreenToWorld(PolygonPointsScr[i]),
-      ScreenToWorld(PolygonPointsScr[i+1]),Canvas);
-
-    DrawSelection(ScreenToWorld(PolygonPointsScr[high(PolygonPointsScr)]),
-    ScreenToWorld(PolygonPointsScr[low(PolygonPointsScr)]),Canvas);
+    DrawSelection(lP,hP,Canvas);
   end;
 end;
 
@@ -397,7 +419,6 @@ var
   r: double;
   i,k: integer;
   PolygonPoints: array of TFloatPoint;
-  PolygonPointsScr: array of TPoint;
 begin
   r := sqrt(abs(sqr(P2.x-P1.x) + sqr(P2.y-P1.y)));
   k:=360 div AFigureCorners;
