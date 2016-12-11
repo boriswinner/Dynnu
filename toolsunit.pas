@@ -13,42 +13,28 @@ type
 
   TFigureClass = figuresunit.TFigureClass;
   TToolClass   = class of TTool;
+  TParameterClass = class of TParameter;
 
   TTool = class
     public
     Bitmap: TBitmap;
     FigureClass: TFigureClass;
+    Parameter: TParameterClass;
+    Parameters: array of TParameterClass;
+    procedure ParametersCreate; virtual;
     procedure Initialize(APanel: TPanel); virtual;
-    procedure CreateLineWidthSpinEdit(APanel: TPanel);
-    procedure CreateLineStyleComboBox(APanel: TPanel);
-    procedure CreateFillStyleComboBox(APanel: TPanel);
-    procedure CreateCornersSpinEdit(APanel: TPanel);
-    procedure CreateAngleSpinEdit(APanel: TPanel);
-    procedure CreateRSpinEdit(APanel: TPanel);
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); virtual;
     procedure AddPoint(APoint: TPoint); virtual;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); virtual;
-    procedure PenStyleComboBoxSelect(Sender: TObject);
-    procedure FillStyleComboBoxSelect(Sender: TObject);
-    procedure LineWidthSpinEditSelect (Sender: TObject);
-    procedure CornersSpinEditSelect (Sender: TObject);
-    procedure AngleSpinEditSelect (Sender: TObject);
-    procedure AngleModeSpinEditSelect (Sender: TObject);
-    procedure RSpinEditXSelect (Sender: TObject);
-    procedure RSpinEditYSelect (Sender: TObject);
-    procedure StyleComboBoxDrawItem(Control: TWinControl;
-  Index: Integer; ARect: TRect; State: TOwnerDrawState);
   end;
 
   TTwoPointsTools = class(TTool)
   public
     procedure AddPoint(APoint: TPoint); override;
-    procedure Initialize(APanel: TPanel); override;
   end;
 
   TSpecificTools = class(TTool)
   public
-    procedure Initialize(APanel: TPanel); override;
   end;
 
   THandTool       = class(TSpecificTools)
@@ -63,40 +49,42 @@ type
   public
     Figure: TPolyline;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure Initialize(APanel: TPanel); override;
+    procedure ParametersCreate; override;
   end;
 
   TRectangleTool  = class(TTwoPointsTools)
   public
     Figure: TRectangle;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure ParametersCreate; override;
   end;
 
   TRoundRectTool  = class(TTwoPointsTools)
   public
     Figure: TRectangle;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure Initialize(APanel: TPanel); override;
+    procedure ParametersCreate; override;
   end;
 
   TEllipseTool    = class(TTwoPointsTools)
   public
     Figure: TEllipse;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure ParametersCreate; override;
   end;
 
   TPolygonTool = class(TTwoPointsTools)
   public
     Figure: TPolygon;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure Initialize(APanel: TPanel); override;
+    procedure ParametersCreate; override;
   end;
 
   TLineTool       = class(TTwoPointsTools)
   public
     Figure: TLine;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure Initialize(APanel: TPanel); override;
+    procedure ParametersCreate; override;
   end;
 
   TMagnifierTool  = class(TTwoPointsTools)
@@ -104,7 +92,6 @@ type
     Figure: TRectangle;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
-    procedure Initialize(APanel: TPanel); override;
   end;
 
   TRectSelectionTool = class(TTwoPointsTools)
@@ -112,8 +99,64 @@ type
     Figure: TRectangle;
     procedure AddPoint(APoint: TPoint); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
-    procedure Initialize(APanel: TPanel); override;
   end;
+
+  TParameter = class
+  public
+    procedure CreateEditor (APanel: TPanel); virtual; abstract;
+    procedure ChangeEditor (Sender: TObject); virtual; abstract;
+    procedure StyleComboBoxDrawItem(Control: TWinControl;
+      Index: Integer; ARect: TRect; State: TOwnerDrawState);
+  end;
+
+  TLineWidthParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
+  TLineStyleParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
+  TFillStyleParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
+  TRoundingXParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
+  TRoundingYParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
+  TCornersParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
+  TAngleParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
+  TAngleModeParameter = class (TParameter)
+  public
+    procedure CreateEditor (APanel: TPanel); override;
+    procedure ChangeEditor (Sender: TObject); override;
+  end;
+
 
 var
   ToolsRegister: array of TTool;
@@ -378,34 +421,34 @@ begin
   setlength(Figures,length(Figures)-1);
 end;
 
-procedure TTool.PenStyleComboBoxSelect(Sender: TObject);
+procedure TLineStyleParameter.ChangeEditor(Sender: TObject);
 begin
   figuresunit.PenStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
 end;
 
-procedure TTool.FillStyleComboBoxSelect(Sender: TObject);
+procedure TFillStyleParameter.ChangeEditor(Sender: TObject);
 begin
   figuresunit.BrushStyle := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
 end;
 
-procedure TTool.LineWidthSpinEditSelect (Sender: TObject);
+procedure TLineWidthParameter.ChangeEditor (Sender: TObject);
 begin
   PenWidth := (Sender as TSpinEdit).Value;
 end;
 
-procedure TTool.CornersSpinEditSelect (Sender: TObject);
+procedure TCornersParameter.ChangeEditor (Sender: TObject);
 begin
   Corners := (Sender as TSpinEdit).Value;
 end;
 
-procedure TTool.AngleSpinEditSelect (Sender: TObject);
+procedure TAngleParameter.ChangeEditor (Sender: TObject);
 begin
   Angle := ((Sender as TSpinEdit).Value*Pi)/180;
 end;
 
-procedure TTool.AngleModeSpinEditSelect (Sender: TObject);
+procedure TAngleModeParameter.ChangeEditor (Sender: TObject);
 begin
   if ((Sender as TCheckBox).Checked = true) then
   begin
@@ -418,17 +461,17 @@ begin
   end;
 end;
 
-procedure TTool.RSpinEditXSelect (Sender: TObject);
+procedure TRoundingXParameter.ChangeEditor (Sender: TObject);
 begin
   RectR.x := (Sender as TSpinEdit).Value;
 end;
 
-procedure TTool.RSpinEditYSelect (Sender: TObject);
+procedure TRoundingYParameter.ChangeEditor (Sender: TObject);
 begin
   RectR.y := (Sender as TSpinEdit).Value;
 end;
 
-procedure TTool.CreateLineWidthSpinEdit(APanel: TPanel);
+procedure TLineWidthParameter.CreateEditor(APanel: TPanel);
 var
   LineWidthSpinEdit: TSpinEdit;
   l: Tlabel;
@@ -440,7 +483,7 @@ begin
   LineWidthSpinEdit.MaxValue := 100;
   LineWidthSpinEdit.MinValue := 1;
   LineWidthSpinEdit.Value := PenWidth;
-  LineWidthSpinEdit.OnChange := @LineWidthSpinEditSelect;
+  LineWidthSpinEdit.OnChange := @ChangeEditor;
   l := TLabel.Create(APanel);
   l.name := 'LineWidthLabel';
   l.Caption := 'Line Width';
@@ -448,7 +491,7 @@ begin
   l.Align := alBottom;
 end;
 
-procedure TTool.CreateCornersSpinEdit(APanel: TPanel);
+procedure TCornersParameter.CreateEditor(APanel: TPanel);
 var
   CornersSpinEdit: TSpinEdit;
   l: TLabel;
@@ -460,7 +503,7 @@ begin
   CornersSpinEdit.MaxValue := 50;
   CornersSpinEdit.MinValue := 3;
   CornersSpinEdit.Value := Corners;
-  CornersSpinEdit.OnChange := @CornersSpinEditSelect;
+  CornersSpinEdit.OnChange := @ChangeEditor;
   l := TLabel.Create(APanel);
   l.name := 'CornersLabel';
   l.Caption := 'Number of corners';
@@ -468,10 +511,9 @@ begin
   l.Align := alBottom;
 end;
 
-procedure TTool.CreateAngleSpinEdit(APanel: TPanel);
+procedure TAngleParameter.CreateEditor(APanel: TPanel);
 var
   l: TLabel;
-  c: TCheckBox;
 begin
   AngleSpinEdit := TSpinEdit.Create(APanel);
   AngleSpinEdit.Name := 'AngleSpinEdit';
@@ -480,25 +522,30 @@ begin
   AngleSpinEdit.MaxValue := 360;
   AngleSpinEdit.MinValue := 0;
   AngleSpinEdit.Value := Angle;
-  AngleSpinEdit.OnChange := @AngleSpinEditSelect;
+  AngleSpinEdit.OnChange := @ChangeEditor;
   AngleSpinEdit.Enabled := false;
-  c := TCheckBox.Create(APanel);
-  c.Parent := APanel;
-  c.name := 'AngleModeCheckBox';
-  c.caption := 'Manual angle control';
-  c.onChange := @AngleModeSpinEditSelect;
-  c.Align := alBottom;
   l := TLabel.Create(APanel);
   l.name := 'AngleLabel';
   l.Caption := 'Rotate Angle';
   l.Parent := APanel;
   l.Align := alBottom;
 end;
+procedure TAngleModeParameter.CreateEditor(APanel: TPanel);
+var
+  c: TCheckBox;
+begin
+  c := TCheckBox.Create(APanel);
+  c.Parent := APanel;
+  c.name := 'AngleModeCheckBox';
+  c.caption := 'Manual angle control';
+  c.onChange := @ChangeEditor;
+  c.Align := alBottom;
+end;
 
-procedure TTool.CreateRSpinEdit(APanel: TPanel);
+procedure TRoundingXParameter.CreateEditor(APanel: TPanel);
 var
   l: TLabel;
-  RSpinEditX, RSpinEditY: TSpinEdit;
+  RSpinEditX: TSpinEdit;
 begin
   RSpinEditX := TSpinEdit.Create(APanel);
   RSpinEditX.Name := 'RSpinEditX';
@@ -507,14 +554,20 @@ begin
   RSpinEditX.MaxValue := 500;
   RSpinEditX.MinValue := 0;
   RSpinEditX.Value := RectR.x;
-  RSpinEditX.OnChange := @RSpinEditXSelect;
+  RSpinEditX.OnChange := @ChangeEditor;
 
   l := TLabel.Create(APanel);
   l.name := 'RSpinEditLabelX';
   l.Caption := 'Rounding Radius (X)';
   l.Parent := APanel;
   l.Align := alBottom;
+end;
 
+procedure TRoundingYParameter.CreateEditor(APanel: TPanel);
+var
+  l: TLabel;
+  RSpinEditY: TSpinEdit;
+begin
   RSpinEditY := TSpinEdit.Create(APanel);
   RSpinEditY.Name := 'RSpinEditY';
   RSpinEditY.Parent := APanel;
@@ -522,7 +575,7 @@ begin
   RSpinEditY.MaxValue := 500;
   RSpinEditY.MinValue := 0;
   RSpinEditY.Value := RectR.y;
-  RSpinEditY.OnChange := @RSpinEditYSelect;
+  RSpinEditY.OnChange := @ChangeEditor;
 
   l := TLabel.Create(APanel);
   l.name := 'RSpinEditLabelY';
@@ -531,7 +584,7 @@ begin
   l.Align := alBottom;
 end;
 
-procedure TTool.CreateLineStyleComboBox(APanel: TPanel);
+procedure TLineStyleParameter.CreateEditor(APanel: TPanel);
 var
   LineStyleComboBox: TComboBox;
   i: integer;
@@ -549,7 +602,7 @@ begin
   LineStyleComboBox.Items.Add(GetEnumName(TypeInfo(TFPPenStyle),
     ord(high(TFPPenStyle))));
   LineStyleComboBox.ItemIndex := ord(PenStyle);
-  LineStyleComboBox.OnSelect  := @PenStyleComboBoxSelect;
+  LineStyleComboBox.OnSelect  := @ChangeEditor;
   LineStyleComboBox.Style := csOwnerDrawFixed;
   LineStyleComboBox.OnDrawItem := @StyleComboBoxDrawItem;
   l := TLabel.Create(APanel);
@@ -559,7 +612,7 @@ begin
   l.Align := alBottom;
 end;
 
-procedure TTool.StyleComboBoxDrawItem(Control: TWinControl;
+procedure TParameter.StyleComboBoxDrawItem(Control: TWinControl;
 Index: Integer; ARect: TRect; State: TOwnerDrawState);
 var
   GraphicsRect: TRect;
@@ -590,7 +643,7 @@ begin
    t.Canvas.Rectangle(GraphicsRect);
 end;
 
-procedure TTool.CreateFillStyleComboBox(APanel: TPanel);
+procedure TFillStyleParameter.CreateEditor(APanel: TPanel);
 var
   FillStyleComboBox: TComboBox;
   i: integer;
@@ -606,7 +659,7 @@ begin
     FillStyleComboBox.Items.Add(GetEnumName(TypeInfo(TBrushStyle),i));
   end;
   FillStyleComboBox.ItemIndex := ord(BrushStyle);
-  FillStyleComboBox.OnSelect  := @FillStyleComboBoxSelect;
+  FillStyleComboBox.OnSelect  := @ChangeEditor;
   FillStyleComboBox.Style := csOwnerDrawFixed;
   FillStyleComboBox.OnDrawItem := @StyleComboBoxDrawItem;
   l := TLabel.Create(APanel);
@@ -616,50 +669,69 @@ begin
   l.Align := alBottom;
 end;
 
+procedure TTool.ParametersCreate;
+begin
+end;
+
+procedure TPolylineTool.ParametersCreate;
+begin
+  setlength (Parameters, 1);
+  Parameters[0] := TLineWidthParameter;
+end;
+
+procedure TRectangleTool.ParametersCreate;
+begin
+  setlength (Parameters, 3);
+  Parameters[0] := TLineWidthParameter;
+  Parameters[1] := TLineStyleParameter;
+  Parameters[2] := TFillStyleParameter;
+end;
+
+procedure TEllipseTool.ParametersCreate;
+begin
+  setlength (Parameters, 3);
+  Parameters[0] := TLineWidthParameter;
+  Parameters[1] := TLineStyleParameter;
+  Parameters[2] := TFillStyleParameter;
+end;
+
+procedure TLineTool.ParametersCreate;
+begin
+  setlength (Parameters, 2);
+  Parameters[0] := TLineWidthParameter;
+  Parameters[1] := TLineStyleParameter;
+end;
+
+procedure TPolygonTool.ParametersCreate;
+begin
+  setlength (Parameters, 5);
+  Parameters[0] := TLineWidthParameter;
+  Parameters[1] := TLineStyleParameter;
+  Parameters[2] := TFillStyleParameter;
+  Parameters[3] := TCornersParameter;
+  Parameters[4] := TAngleParameter;
+end;
+
+procedure TRoundRectTool.ParametersCreate;
+begin
+  setlength (Parameters, 5);
+  Parameters[0] := TLineWidthParameter;
+  Parameters[1] := TLineStyleParameter;
+  Parameters[2] := TFillStyleParameter;
+  Parameters[3] := TRoundingXParameter;
+  Parameters[4] := TRoundingXParameter;
+end;
+
 procedure TTool.Initialize(APanel: TPanel);
+var
+  i: integer;
 begin
-end;
-
-procedure TPolylineTool.Initialize(APanel: TPanel);
-begin
-  CreateLineWidthSpinEdit(APanel);
-end;
-
-procedure TTwoPointsTools.Initialize(APanel: TPanel);
-begin
-  CreateLineWidthSpinEdit(APanel);
-  CreateLineStyleComboBox(APanel);
-  CreateFillStyleComboBox(APanel);
-end;
-
-procedure TRoundRectTool.Initialize(APanel: TPanel);
-begin
-  Inherited;
-  CreateRSpinEdit(APanel);
-end;
-
-procedure TPolygonTool.Initialize(APanel: TPanel);
-begin
-  CreateLineWidthSpinEdit(APanel);
-  CreateLineStyleComboBox(APanel);
-  CreateFillStyleComboBox(APanel);
-  CreateCornersSpinEdit(APanel);
-  CreateAngleSpinEdit(APanel);
-end;
-
-procedure TSpecificTools.Initialize(APanel: TPanel);
-begin
-end;
-procedure TMagnifierTool.Initialize(APanel: TPanel);
-begin
-end;
-procedure TRectSelectionTool.Initialize(APanel: TPanel);
-begin
-end;
-procedure TLineTool.Initialize(APanel: TPanel);
-begin
-  CreateLineWidthSpinEdit(APanel);
-  CreateLineStyleComboBox(APanel);
+  ParametersCreate;
+  for i := low(Parameters) to high(Parameters) do
+  begin
+    //Parameter :=
+    Parameters[i].Create.CreateEditor(APanel);
+  end;
 end;
 
 initialization
