@@ -268,6 +268,7 @@ begin
     SetLength(Points,length(Points)+1);
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
   end;
+  SetMaxMinFloatPoints(ScreenToWorld(APoint));
 end;
 
 procedure TTwoPointsTool.AddPoint(APoint: TPoint);
