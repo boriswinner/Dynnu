@@ -13,10 +13,9 @@ type
   tempPointsArray = array[0..3] of TPoint;
   PolygonPointsArray = array of TPoint;
 
-  TFigure = class
+  TFigure = class (TPersistent)
   public
     Points: array of TFloatPoint;
-    FigurePenColor,FigureBrushColor: TColor;
     Selected: boolean;
     FigureRegion: HRGN;
     procedure Draw(Canvas: TCanvas); virtual;
@@ -24,55 +23,61 @@ type
     procedure SetRegion; virtual; abstract;
   end;
 
-  TPolyline       = class(TFigure)
+  TVisibleFigure = class (TFigure)
   public
+    FigurePenColor,FigureBrushColor: TColor;
     FigurePenWidth: integer;
+    procedure Draw(Canvas: TCanvas); override;
+  end;
+
+  TInvisibleFigure = class (TFigure)
+  public
+    procedure Draw(Canvas: TCanvas); override;
+  end;
+
+  TPenStyleFigure = class (TVisibleFigure)
+  public
     FigurePenStyle: TPenStyle;
+  end;
+
+  TBrushStyleFigure = class (TPenStyleFigure)
+  public
+    FigureBrushStyle: TBrushStyle;
+  end;
+
+  TPolyline       = class(TPenStyleFigure)
+  public
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
   end;
 
-  TRectangle      = class(TFigure)
+  TLine           = class(TPenStyleFigure)
   public
-    FigurePenStyle: TPenStyle;
-    FigureBrushStyle: TBrushStyle;
-    FigurePenWidth: integer;
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
   end;
 
-  TRoundRect      = class(TFigure)
+  TRectangle      = class(TBrushStyleFigure)
   public
-    FigurePenStyle: TPenStyle;
-    FigureBrushStyle: TBrushStyle;
-    FigurePenWidth: integer;
+    procedure Draw(Canvas:TCanvas); override;
+    procedure SetRegion; override;
+  end;
+
+  TEllipse        = class(TBrushStyleFigure)
+  public
+    procedure Draw(Canvas:TCanvas); override;
+    procedure SetRegion; override;
+  end;
+
+  TRoundRect      = class(TBrushStyleFigure)
+  public
     FigureR: TPoint;
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
   end;
 
-  TEllipse        = class(TFigure)
+  TPolygon = class(TBrushStyleFigure)
   public
-    FigurePenStyle: TPenStyle;
-    FigureBrushStyle: TBrushStyle;
-    FigurePenWidth: integer;
-    procedure Draw(Canvas:TCanvas); override;
-    procedure SetRegion; override;
-  end;
-
-  TLine           = class(TFigure)
-  public
-    FigurePenWidth: integer;
-    FigurePenStyle: TPenStyle;
-    procedure Draw(Canvas:TCanvas); override;
-    procedure SetRegion; override;
-  end;
-
-  TPolygon = class(TFigure)
-  public
-    FigurePenWidth: integer;
-    FigurePenStyle: TPenStyle;
-    FigureBrushStyle: TBrushStyle;
     FigureCorners: integer;
     FigureAngle: double;
     FigureAngleMode: boolean;
@@ -82,12 +87,12 @@ type
     procedure SetRegion; override;
   end;
 
-  THandFigure     = class(TFigure)
+  THandFigure     = class(TInvisibleFigure)
   public
     procedure Draw(Canvas: TCanvas); override;
   end;
 
-  TMagnifierFrame = class(TFigure)
+  TMagnifierFrame = class(TInvisibleFigure)
   public
     procedure Draw(Canvas: TCanvas); override;
   end;
@@ -171,8 +176,20 @@ end;
 
 procedure TFigure.Draw(Canvas: TCanvas);
 begin
+  {Canvas.Pen.Color := FigurePenColor;
+  Canvas.Brush.Color := FigureBrushColor;}
+end;
+
+procedure TVisibleFigure.Draw(Canvas: TCanvas);
+begin
   Canvas.Pen.Color := FigurePenColor;
   Canvas.Brush.Color := FigureBrushColor;
+end;
+
+procedure TInvisibleFigure.Draw(Canvas: TCanvas);
+begin
+  {Canvas.Pen.Color := FigurePenColor;
+  Canvas.Brush.Color := FigureBrushColor;}
 end;
 
 

@@ -33,16 +33,74 @@ type
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); virtual;
   end;
 
-  TTwoPointsTools = class(TTool)
+  TVisibleTool = class (TTool)
+  public
+  procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+  end;
+
+  TTwoPointsTool = class(TVisibleTool)
+  public
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure AddPoint(APoint: TPoint); override;
+  end;
+
+  TTwoPointsPenStyleTool = class (TTwoPointsTool)
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+  end;
+
+  TTwoPointsBrushStyleTool = class (TTwoPointsPenStyleTool)
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+  end;
+
+  TPolylineTool   = class(TVisibleTool)
+  public
+    Figure: TPolyline;
+    procedure AddPoint(APoint: TPoint); override;
+    procedure ParametersCreate; override;
+  end;
+
+  TRectangleTool  = class(TTwoPointsBrushStyleTool)
+  public
+    Figure: TRectangle;
+    procedure ParametersCreate; override;
+  end;
+
+  TRoundRectTool  = class(TTwoPointsBrushStyleTool)
+  public
+    Figure: TRectangle;
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure ParametersCreate; override;
+  end;
+
+  TEllipseTool    = class(TTwoPointsBrushStyleTool)
+  public
+    Figure: TEllipse;
+    procedure ParametersCreate; override;
+  end;
+
+  TPolygonTool = class(TTwoPointsBrushStyleTool)
+  public
+    Figure: TPolygon;
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
+    procedure ParametersCreate; override;
+  end;
+
+  TLineTool       = class(TTwoPointsPenStyleTool)
+  public
+    Figure: TLine;
+    procedure ParametersCreate; override;
+  end;
+
+  TInvisibleTool = class (TTool)
+  public
+  end;
+
+  TTwoPointsInvisibleTools = class(TInvisibleTool)
   public
     procedure AddPoint(APoint: TPoint); override;
   end;
 
-  TSpecificTools = class(TTool)
-  public
-  end;
-
-  THandTool       = class(TSpecificTools)
+  THandTool       = class(TInvisibleTool)
   public
     Figure: THandFigure;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);override;
@@ -50,63 +108,19 @@ type
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
   end;
 
-  TPolylineTool   = class(TTool)
-  public
-    Figure: TPolyline;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure ParametersCreate; override;
-  end;
-
-  TRectangleTool  = class(TTwoPointsTools)
+  TMagnifierTool  = class(TTwoPointsInvisibleTools)
   public
     Figure: TRectangle;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure ParametersCreate; override;
-  end;
-
-  TRoundRectTool  = class(TTwoPointsTools)
-  public
-    Figure: TRectangle;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure ParametersCreate; override;
-  end;
-
-  TEllipseTool    = class(TTwoPointsTools)
-  public
-    Figure: TEllipse;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure ParametersCreate; override;
-  end;
-
-  TPolygonTool = class(TTwoPointsTools)
-  public
-    Figure: TPolygon;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure ParametersCreate; override;
-  end;
-
-  TLineTool       = class(TTwoPointsTools)
-  public
-    Figure: TLine;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure ParametersCreate; override;
-  end;
-
-  TMagnifierTool  = class(TTwoPointsTools)
-  public
-    Figure: TRectangle;
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
   end;
 
-  TRectSelectionTool = class(TTwoPointsTools)
+  TRectSelectionTool = class(TTwoPointsInvisibleTools)
   public
     Figure: TRectangle;
-    procedure AddPoint(APoint: TPoint); override;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
   end;
 
-  TParameterTool = class(TTool)
+  TParameterTool = class(TInvisibleTool)
   public
     function FindIntersection: TParameterClassArray;
   end;
@@ -181,21 +195,59 @@ begin
   SetLength(Figures,length(Figures)+1);
   Figures[high(Figures)] := AFigureClass.Create;
   with Figures[high(Figures)] do begin
-    FigurePenColor := PenColor;
-    FigureBrushColor := BrushColor;
     SetLength(Points,1);
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
   end;
 end;
 
-procedure TPolylineTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+procedure TVisibleTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
 begin
   Inherited;
-  with Figures[high(Figures)] as TPolyline do begin
-    FigurePenStyle := PenStyle;
+  with Figures[high(Figures)] as TVisibleFigure do begin
+    FigurePenColor := PenColor;
+    FigureBrushColor := BrushColor;
     FigurePenWidth := PenWidth;
   end;
   SetMaxMinFloatPoints(ScreenToWorld(APoint));
+end;
+
+procedure TTwoPointsTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+begin
+  Inherited;
+end;
+
+procedure TTwoPointsPenStyleTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+begin
+  Inherited;
+  with Figures[high(Figures)] as TPenStyleFigure do begin
+    FigurePenStyle := PenStyle;
+  end;
+end;
+
+procedure TTwoPointsBrushStyleTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+begin
+  Inherited;
+  with Figures[high(Figures)] as TBrushStyleFigure do begin
+    FigureBrushStyle := BrushStyle;
+  end;
+end;
+
+procedure TRoundRectTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+begin
+  Inherited;
+  with Figures[high(Figures)] as TRoundRect do begin
+    FigureR := RectR;
+  end;
+end;
+
+procedure TPolygonTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+begin
+  Inherited;
+  with Figures[high(Figures)] as TPolygon do begin
+    FigureCorners := Corners;
+    FigureAngle := Angle;
+    FigureAngleMode := AngleMode;
+  end;
 end;
 
 procedure THandTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
@@ -205,96 +257,34 @@ begin
   OffsetFirstPoint.y:=Offset.y+APoint.y;
 end;
 
-procedure TRectangleTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-begin
-  Inherited;
-  with Figures[high(Figures)] as TRectangle do begin
-    FigurePenStyle := PenStyle;
-    FigureBrushStyle := BrushStyle;
-    FigurePenWidth := PenWidth;
-  end;
-  SetMaxMinFloatPoints(ScreenToWorld(APoint));
-end;
-
-procedure TRoundRectTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-begin
-  Inherited;
-  with Figures[high(Figures)] as TRoundRect do begin
-    FigurePenStyle := PenStyle;
-    FigureBrushStyle := BrushStyle;
-    FigurePenWidth := PenWidth;
-    FigureR := RectR;
-  end;
-  SetMaxMinFloatPoints(ScreenToWorld(APoint));
-end;
-
-procedure TEllipseTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-begin
-  Inherited;
-  with Figures[high(Figures)] as TEllipse do begin
-    FigurePenStyle := PenStyle;
-    FigureBrushStyle := BrushStyle;
-    FigurePenWidth := PenWidth;
-  end;
-  SetMaxMinFloatPoints(ScreenToWorld(APoint));
-end;
-
-procedure TLineTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-begin
-  Inherited;
-  with Figures[high(Figures)] as TLine do begin
-    FigurePenStyle := PenStyle;
-    FigurePenWidth := PenWidth;
-  end;
-  SetMaxMinFloatPoints(ScreenToWorld(APoint));
-end;
-
-procedure TPolygonTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-begin
-  Inherited;
-  with Figures[high(Figures)] as TPolygon do begin
-    FigurePenStyle := PenStyle;
-    FigureBrushStyle := BrushStyle;
-    FigurePenWidth := PenWidth;
-    FigureCorners := Corners;
-    FigureAngle := Angle;
-    FigureAngleMode := AngleMode;
-  end;
-  SetMaxMinFloatPoints(ScreenToWorld(APoint));
-end;
-
-procedure TMagnifierTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-begin
-  Inherited;
-end;
-
 procedure TTool.AddPoint(APoint: TPoint);
+begin
+end;
+
+procedure TPolylineTool.AddPoint(APoint: TPoint);
 begin
   with Figures[high(Figures)] do begin
     SetLength(Points,length(Points)+1);
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
   end;
-  SetMaxMinFloatPoints(ScreenToWorld(APoint));
 end;
 
-procedure TTwoPointsTools.AddPoint(APoint: TPoint);
+procedure TTwoPointsTool.AddPoint(APoint: TPoint);
 begin
   with Figures[high(Figures)] do begin
     SetLength(Points,2);
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
   end;
-  if (ClassName <> 'TMagnifierTool') and (ClassName <> 'TSelectionTool') then
-        SetMaxMinFloatPoints(ScreenToWorld(APoint));
+  SetMaxMinFloatPoints(ScreenToWorld(APoint));
 end;
 
-procedure TRectSelectionTool.AddPoint(APoint: TPoint);
+procedure TTwoPointsInvisibleTools.AddPoint (APoint: TPoint);
 begin
-  Inherited;
   with Figures[high(Figures)] do begin
+    SetLength(Points,2);
     Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
   end;
 end;
-
 
 procedure THandTool.AddPoint(APoint: TPoint);
 begin
@@ -328,7 +318,7 @@ procedure TMagnifierTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; 
 var
   t: double;
 begin
-    with Figures[high(Figures)] do begin
+    with Figures[high(Figures)] as TMagnifierFrame do begin
       if(Points[low(Points)].x+5>Points[high(Points)].x) then
       begin
         if (not RBtn) then t := Zoom*2 else t := Zoom / 2;
@@ -436,33 +426,45 @@ begin
 end;
 
 procedure TLineStyleParameter.ChangeEditor(Sender: TObject);
+var
+  i: integer;
 begin
   figuresunit.PenStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
 end;
 
 procedure TFillStyleParameter.ChangeEditor(Sender: TObject);
+var
+  i: integer;
 begin
   figuresunit.BrushStyle := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
 end;
 
 procedure TLineWidthParameter.ChangeEditor (Sender: TObject);
+var
+  i: integer;
 begin
   PenWidth := (Sender as TSpinEdit).Value;
 end;
 
 procedure TCornersParameter.ChangeEditor (Sender: TObject);
+var
+  i: integer;
 begin
   Corners := (Sender as TSpinEdit).Value;
 end;
 
 procedure TAngleParameter.ChangeEditor (Sender: TObject);
+var
+  i: integer;
 begin
   Angle := ((Sender as TSpinEdit).Value*Pi)/180;
 end;
 
 procedure TAngleModeParameter.ChangeEditor (Sender: TObject);
+var
+  i: integer;
 begin
   if ((Sender as TCheckBox).Checked = true) then
   begin
@@ -476,11 +478,15 @@ begin
 end;
 
 procedure TRoundingXParameter.ChangeEditor (Sender: TObject);
+var
+  i: integer;
 begin
   RectR.x := (Sender as TSpinEdit).Value;
 end;
 
 procedure TRoundingYParameter.ChangeEditor (Sender: TObject);
+var
+  i: integer;
 begin
   RectR.y := (Sender as TSpinEdit).Value;
 end;
