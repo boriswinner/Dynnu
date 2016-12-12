@@ -211,7 +211,17 @@ end;
 procedure TMainForm.MainPaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn);
+  if (CurrentTool.ClassName = 'TRectSelectionTool') then
+  begin
+    FreeAndNil(PropPanel);
+    PropPanel := TPanel.Create(ToolsPanel);
+    PropPanel.Parent := ToolsPanel;
+    PropPanel.Align := alClient;
+    PropPanel.Name := 'PropPanel';
+    PropPanel.Caption := '';
+    CurrentTool.Initialize(PropPanel);
+  end;
+  CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
   ZoomSpinEdit.Value := scalesunit.Zoom;
   RBtn := false;
   Invalidate;

@@ -14,18 +14,23 @@ type
   TFigureClass = figuresunit.TFigureClass;
   TToolClass   = class of TTool;
   TParameterClass = class of TParameter;
+  TParameterClassArray = array of TParameterClass;
+  CreatedParameters = record
+    ParameterClassArray: TParameterClassArray;
+    created: array of boolean;
+  end;
 
   TTool = class
     public
     Bitmap: TBitmap;
     FigureClass: TFigureClass;
     Parameter: TParameterClass;
-    Parameters: array of TParameterClass;
+    Parameters: TParameterClassArray;
     procedure ParametersCreate; virtual;
     procedure Initialize(APanel: TPanel); virtual;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); virtual;
     procedure AddPoint(APoint: TPoint); virtual;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); virtual;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); virtual;
   end;
 
   TTwoPointsTools = class(TTool)
@@ -42,7 +47,7 @@ type
     Figure: THandFigure;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);override;
     procedure AddPoint(APoint: TPoint); override;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
   end;
 
   TPolylineTool   = class(TTool)
@@ -91,14 +96,19 @@ type
   public
     Figure: TRectangle;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
   end;
 
   TRectSelectionTool = class(TTwoPointsTools)
   public
     Figure: TRectangle;
     procedure AddPoint(APoint: TPoint); override;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
+  end;
+
+  TParameterTool = class(TTool)
+  public
+    function FindIntersection: TParameterClassArray;
   end;
 
   TParameter = class
@@ -310,11 +320,11 @@ begin
   end;
 end;
 
-procedure TTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
+procedure TTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
 begin
 end;
 
-procedure TMagnifierTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
+procedure TMagnifierTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
 var
   t: double;
 begin
@@ -337,11 +347,12 @@ begin
   end;
 end;
 
-procedure TRectSelectionTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
+procedure TRectSelectionTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
 var
   t: HRGN;
   i: integer;
   mode: boolean;
+  params: TParameterClassArray;
 begin
   with Figures[high(Figures)] do
   begin
@@ -414,9 +425,12 @@ begin
   end;
   end;
   setlength(Figures,length(Figures)-1);
+  params := TParameterTool.Create.FindIntersection;
+  for i := low(params) to high(params) do
+  params[i].Create.CreateEditor(APanel);
 end;
 
-procedure THandTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean);
+procedure THandTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
 begin
   setlength(Figures,length(Figures)-1);
 end;
@@ -729,8 +743,70 @@ begin
   ParametersCreate;
   for i := low(Parameters) to high(Parameters) do
   begin
-    //Parameter :=
     Parameters[i].Create.CreateEditor(APanel);
+  end;
+end;
+
+function TParameterTool.FindIntersection: TParameterClassArray;
+var
+  i,j,z,q,previndex,altcnt,altindex: integer;
+  isPresented: boolean;
+  tGood: array of boolean;
+  tResult: TParameterClassArray;
+begin
+  altcnt := 0;
+  setlength(tResult,0);
+  setlength(Result,0);
+  isPresented := false;
+  previndex := high(Figures);
+  for z := low(tGood) to high(tGood) do tGood[z] := true;
+
+  for i := low(Figures)+1 to high(Figures) do
+  begin
+   if (Figures[i].Selected = true) then
+   begin
+     for j := low(ToolsRegister) to high (ToolsRegister) do
+     begin
+      if ToolsRegister[j].FigureClass.ClassName = Figures[i].ClassName then
+      begin
+        inc(altcnt);
+        if (altcnt = 1) then
+        begin
+          previndex := j;
+          setlength(tResult,length(ToolsRegister[j].Parameters));
+          setlength(tGood,length(ToolsRegister[j].Parameters));
+          for z := low(tGood) to high(tGood) do tGood[z] := true;
+          tResult := ToolsRegister[j].Parameters;
+          altindex := i;
+        end else
+        begin
+         for z := low(ToolsRegister[previndex].Parameters) to high(ToolsRegister[previndex].Parameters) do
+         begin
+          isPresented := false;
+          for q := low(ToolsRegister[j].Parameters) to high(ToolsRegister[j].Parameters) do
+          begin
+            if ToolsRegister[previndex].Parameters[z] = ToolsRegister[j].Parameters[q] then
+              isPresented := true;
+          end;
+          setlength(tGood,length(ToolsRegister[previndex].Parameters));
+          if (not isPresented) then
+          begin
+            tGood[z] := false;
+          end;
+         end;
+        end;
+        previndex := j;
+      end;
+     end;
+   end;
+  end;
+  for i := low(tResult) to high(tResult) do
+  begin
+   if (tGood[i] <> false) then
+   begin
+     setlength(Result,length(Result)+1);
+     Result[high(Result)] := tResult[i];
+   end;
   end;
 end;
 
