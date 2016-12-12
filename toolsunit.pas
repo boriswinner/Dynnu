@@ -120,6 +120,14 @@ type
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
   end;
 
+  TMoveTool = class(TInvisibleTool)
+  public
+    Figure: THandFigure;
+    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);override;
+    procedure AddPoint(APoint: TPoint); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
+  end;
+
   TParameterTool = class(TInvisibleTool)
   public
     function FindIntersection: TParameterClassArray;
@@ -189,6 +197,7 @@ var
   AngleMode: boolean;
   CtrlBtn: boolean;
   MainPaintBox: TPaintBox;
+  tempSelection: integer;
 implementation
 
 procedure TTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
@@ -258,6 +267,27 @@ begin
   OffsetFirstPoint.y:=Offset.y+APoint.y;
 end;
 
+procedure TMoveTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
+var
+  i: integer;
+begin
+  Inherited;
+  for i := high(Figures)-1 downto low(Figures)+1  do
+  begin
+    with Figures[i] do
+    begin
+      DeleteObject(FigureRegion);
+      SetRegion;
+      if (PtInRegion(FigureRegion,APoint.X,Apoint.Y)=true) and (Selected = false) then
+      begin
+        Selected := true;
+        tempSelection:=i;
+        break;
+      end;
+    end;
+  end;
+end;
+
 procedure TTool.AddPoint(APoint: TPoint);
 begin
 end;
@@ -292,12 +322,36 @@ procedure THandTool.AddPoint(APoint: TPoint);
 begin
   with Figures[high(Figures)] do begin
     SetLength(Points,2);
+    Offset.x := OffsetFirstPoint.x-APoint.x;
+    Offset.y := OffsetFirstPoint.y-APoint.y;
+  end;
+end;
+
+procedure TMoveTool.AddPoint(APoint: TPoint);
+var
+  i,j: integer;
+begin
+  with Figures[high(Figures)] do begin
+    SetLength(Points,2);
     Points[high(Points)].x := scalesunit.ScreenToWorld(APoint).x -
       Points[low(Points)].x;
     Points[high(Points)].y := scalesunit.ScreenToWorld(APoint).y -
       Points[low(Points)].y;
-    Offset.x := OffsetFirstPoint.x-APoint.x;
-    Offset.y := OffsetFirstPoint.y-APoint.y;
+  end;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+    begin
+      for j := low(Figures[i].Points) to high(Figures[i].Points) do
+      begin
+        Figures[i].Points[j] := Figures[i].Points[j] +
+          Figures[high(Figures)].Points[high(Figures[high(Figures)].Points)];
+        SetMaxMinFloatPoints(Figures[i].Points[j]);
+      end;
+    end;
+  end;
+  with Figures[high(Figures)] do begin
+    Points[low(Points)] := ScreenToWorld(APoint);
   end;
 end;
 
@@ -424,6 +478,15 @@ end;
 
 procedure THandTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
 begin
+  setlength(Figures,length(Figures)-1);
+end;
+
+procedure TMoveTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
+var
+  i: integer;
+begin
+  Figures[tempSelection].Selected := false;
+  tempSelection:=0;
   setlength(Figures,length(Figures)-1);
 end;
 
@@ -878,6 +941,7 @@ RegisterTool (THandTool.Create, THandFigure, 'Hand.bmp');
 RegisterTool (TPolygonTool.Create, TPolygon, 'Polygon.bmp');
 RegisterTool (TRoundRectTool.Create, TRoundRect, 'RoundRect.bmp');
 RegisterTool (TRectSelectionTool.Create, TMagnifierFrame, 'Selection.bmp');
+RegisterTool (TMoveTool.Create, THandFigure, 'Move.bmp');
 AngleMode := false;
 RectR := Point(50,50);
 end.
