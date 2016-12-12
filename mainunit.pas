@@ -219,7 +219,7 @@ begin
     PropPanel.Align := alClient;
     PropPanel.Name := 'PropPanel';
     PropPanel.Caption := '';
-    CurrentTool.Initialize(PropPanel);
+    CurrentTool.Initialize(PropPanel,MainPaintBox);
   end;
   CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
   ZoomSpinEdit.Value := scalesunit.Zoom;
@@ -265,7 +265,7 @@ begin
   PropPanel.Align := alClient;
   PropPanel.Name := 'PropPanel';
   PropPanel.Caption := '';
-  CurrentTool.Initialize(PropPanel);
+  CurrentTool.Initialize(PropPanel,MainPaintBox);
 end;
 
 procedure TMainForm.ColorsGridDblClick(Sender: TObject);
@@ -292,13 +292,22 @@ end;
 procedure TMainForm.ColorsGridMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
-  Col,Row: integer;
+  Col,Row,i: integer;
 begin
   ColorsGrid.MouseToCell(X,Y,Col,Row);
   if (ssLeft in Shift) then PenColor := Colors[ColorsGrid.ColCount*Row+Col];
   if (ssRight in Shift) then BrushColor := Colors[ColorsGrid.ColCount*Row+Col];
   ColorLabel1.Color := PenColor;
   ColorLabel2.Color := BrushColor;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+    begin
+      (Figures[i] as TVisibleFigure).FigurePenColor := PenColor;
+      (Figures[i] as TVisibleFigure).FigureBrushColor := BrushColor;
+    end;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TMainForm.MainPaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X,

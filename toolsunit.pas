@@ -27,7 +27,7 @@ type
     Parameter: TParameterClass;
     Parameters: TParameterClassArray;
     procedure ParametersCreate; virtual;
-    procedure Initialize(APanel: TPanel); virtual;
+    procedure Initialize(APanel: TPanel; APaintBox: TPaintBox); virtual;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); virtual;
     procedure AddPoint(APoint: TPoint); virtual;
     procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); virtual;
@@ -188,6 +188,7 @@ var
   AngleSpinEdit: TSpinEdit;
   AngleMode: boolean;
   CtrlBtn: boolean;
+  MainPaintBox: TPaintBox;
 implementation
 
 procedure TTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
@@ -431,6 +432,12 @@ var
 begin
   figuresunit.PenStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TPenStyleFigure).FigurePenStyle := PenStyle;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TFillStyleParameter.ChangeEditor(Sender: TObject);
@@ -439,6 +446,12 @@ var
 begin
   figuresunit.BrushStyle := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TBrushStyleFigure).FigureBrushStyle := BrushStyle;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TLineWidthParameter.ChangeEditor (Sender: TObject);
@@ -446,6 +459,12 @@ var
   i: integer;
 begin
   PenWidth := (Sender as TSpinEdit).Value;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TVisibleFigure).FigurePenWidth := PenWidth;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TCornersParameter.ChangeEditor (Sender: TObject);
@@ -453,6 +472,12 @@ var
   i: integer;
 begin
   Corners := (Sender as TSpinEdit).Value;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TPolygon).FigureCorners := Corners;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TAngleParameter.ChangeEditor (Sender: TObject);
@@ -460,6 +485,12 @@ var
   i: integer;
 begin
   Angle := ((Sender as TSpinEdit).Value*Pi)/180;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TPolygon).FigureAngle := Angle;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TAngleModeParameter.ChangeEditor (Sender: TObject);
@@ -475,6 +506,12 @@ begin
     AngleSpinEdit.Enabled := false;
     AngleMode := false;
   end;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TPolygon).FigureAngleMode := AngleMode;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TRoundingXParameter.ChangeEditor (Sender: TObject);
@@ -482,6 +519,12 @@ var
   i: integer;
 begin
   RectR.x := (Sender as TSpinEdit).Value;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TRoundRect).FigureR.x := RectR.x;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TRoundingYParameter.ChangeEditor (Sender: TObject);
@@ -489,6 +532,12 @@ var
   i: integer;
 begin
   RectR.y := (Sender as TSpinEdit).Value;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      (Figures[i] as TRoundRect).FigureR.y := RectR.y;
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TLineWidthParameter.CreateEditor(APanel: TPanel);
@@ -743,11 +792,12 @@ begin
   Parameters[4] := TRoundingYParameter;
 end;
 
-procedure TTool.Initialize(APanel: TPanel);
+procedure TTool.Initialize(APanel: TPanel; APaintBox: TPaintBox);
 var
   i: integer;
 begin
   ParametersCreate;
+  MainPaintBox := APaintBox;
   for i := low(Parameters) to high(Parameters) do
   begin
     Parameters[i].Create.CreateEditor(APanel);
