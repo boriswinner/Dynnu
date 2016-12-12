@@ -718,12 +718,13 @@ end;
 
 procedure TPolygonTool.ParametersCreate;
 begin
-  setlength (Parameters, 5);
+  setlength (Parameters, 6);
   Parameters[0] := TLineWidthParameter;
   Parameters[1] := TLineStyleParameter;
   Parameters[2] := TFillStyleParameter;
   Parameters[3] := TCornersParameter;
   Parameters[4] := TAngleParameter;
+  Parameters[5] := TAngleModeParameter;
 end;
 
 procedure TRoundRectTool.ParametersCreate;
