@@ -193,6 +193,10 @@ object MainForm: TMainForm
         Caption = 'Save As'
         OnClick = SaveAsMenuItemClick
       end
+      object OpenMenuitem: TMenuItem
+        Caption = 'Open '
+        OnClick = OpenMenuitemClick
+      end
       object ExitMenuItem: TMenuItem
         Caption = 'Exit'
         OnClick = ExitMenuItemClick

@@ -28,6 +28,7 @@ type
     ExitMenuItem: TMenuItem;
     AboutMenuItem: TMenuItem;
     MainPaintBox: TPaintBox;
+    OpenMenuitem: TMenuItem;
     SaveMenuItem: TMenuItem;
     SaveAsMenuItem: TMenuItem;
     ShowAllItem: TMenuItem;
@@ -40,11 +41,13 @@ type
     ZoomSpinEdit: TSpinEdit;
     ToolsPanel: TPanel;
     SaveImageDialog: TSaveDialog;
+    OpenImageDialog: TOpenDialog;
     procedure AboutMenuItemClick(Sender: TObject);
     procedure AntiAliasingComboBoxChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure OpenMenuitemClick(Sender: TObject);
     procedure SaveAsMenuItemClick(Sender: TObject);
     procedure SaveMenuItemClick(Sender: TObject);
     procedure ScrollBarScroll(Sender: TObject;
@@ -81,6 +84,7 @@ type
     PropPanel: TPanel;
     ImageName, LastSavedFile: string;
     FileWasChanged, FileWasSaved: boolean;
+    tSignature: string;
     const signature = '@DYNNUVECTORIMAGE';
   public
     { public declarations }
@@ -211,6 +215,62 @@ procedure TMainForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
 begin
   if (key=VK_CONTROL) then
     CtrlBtn:= false;
+end;
+
+
+procedure TMainForm.OpenMenuitemClick(Sender: TObject);
+var
+  f: text;
+  tFigures: array of TFigure;
+  tLength,t: integer;
+  i,j: integer;
+  tParams: StringArray;
+begin
+  OpenImageDialog := TOpenDialog.Create(Self);
+  with OpenImageDialog do
+  begin
+    InitialDir := GetCurrentDir;
+    Filter := 'Dynnu Vector Image|*.dvimg|';
+    Title := 'Open a Dynnu Vector Image';
+    DefaultExt:= 'dvimg';
+  end;
+  if OpenImageDialog.Execute then
+  begin
+    AssignFile(f,OpenImageDialog.FileName);
+    reset(f);
+    readln(f,tSignature);
+    if (tSignature<>signature) then
+    begin
+      ShowMessage('Invalid file');
+      CloseFile(f);
+      exit;
+    end;
+    readln(f,tLength);
+    setlength(tFigures,tLength);
+    for i := low(tFigures) to high(tFigures) do
+    begin
+      readln(f,t);
+      setlength(tParams,t);
+      for j := 0 to t-1 do
+      begin
+        readln(f,tParams[j]);
+      end;
+      case tParams[0] of
+      'TRectangle': tFigures[i] := TRectangle.Create;
+      'TPolyline': tFigures[i] := TPolyline.Create;
+      'TLine': tFigures[i] := TLine.Create;
+      'TEllipse': tFigures[i] := TEllipse.Create;
+      'TRoundRect': tFigures[i] := TRoundRect.Create;
+      'TPolygon': tFigures[i] := TPolygon.Create;
+      end;
+      tFigures[i].Load(tParams);
+    end;
+    CloseFile(f);
+    setlength(Figures,length(tFigures));
+    for i := low(tFigures) to high(tFigures) do
+      Figures[i] := tFigures[i];
+    MainPaintBox.Invalidate;
+  end;
 end;
 
 procedure TMainForm.SaveAsMenuItemClick(Sender: TObject);

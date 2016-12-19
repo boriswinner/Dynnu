@@ -5,7 +5,7 @@ unit figuresunit;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus, strutils,
   ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo, LCL, Windows,
   scalesunit;
 type
@@ -23,6 +23,7 @@ type
     procedure DrawSelection(Pt1,Pt2: TPoint; Canvas: TCanvas); virtual;
     procedure SetRegion; virtual; abstract;
     function Save: StringArray; virtual;
+    procedure Load(AParams: StringArray); virtual;
   end;
 
   TVisibleFigure = class (TFigure)
@@ -31,6 +32,7 @@ type
     FigurePenWidth: integer;
     procedure Draw(Canvas: TCanvas); override;
     function Save: StringArray override;
+    procedure Load(AParams: StringArray); override;
   end;
 
   TInvisibleFigure = class (TFigure)
@@ -41,13 +43,15 @@ type
   TPenStyleFigure = class (TVisibleFigure)
   public
     FigurePenStyle: TPenStyle;
-   function Save: StringArray; override;
+    function Save: StringArray; override;
+    procedure Load(AParams: StringArray); override;
   end;
 
   TBrushStyleFigure = class (TPenStyleFigure)
   public
     FigureBrushStyle: TBrushStyle;
     function Save: StringArray; override;
+    procedure Load(AParams: StringArray); override;
   end;
 
   TPolyline       = class(TVisibleFigure)
@@ -80,6 +84,7 @@ type
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
     function Save: StringArray; override;
+    procedure Load(AParams: StringArray); override;
   end;
 
   TPolygon = class(TBrushStyleFigure)
@@ -92,6 +97,7 @@ type
     function CreatePolygon (P1,P2: TFloatPoint; AFigureCorners: integer; AFigureAngle: double; AFigureAngleMode: boolean): PolygonPointsArray;
     procedure SetRegion; override;
     function Save: StringArray; override;
+    procedure Load(AParams: StringArray); override;
   end;
 
   THandFigure     = class(TInvisibleFigure)
@@ -462,11 +468,12 @@ function TFigure.Save: StringArray;
 var
   i: integer;
 begin
-  setlength(Result,2);
-  Result[0] := ClassName;
-  Result[1] := '';
+  setlength(Result,3);
+  Result[0] := IntToStr(length(Result)-1);
+  Result[1] := ClassName;
+  Result[2] := '';
   for i := low(Points) to high(Points) do
-    Result[1] := Result[1] + ' ' + FloatToStr(Points[i].x) + ' ' + FloatToStr(Points[i].y);
+    Result[2] := Result[2] + ' ' + FloatToStr(Points[i].x) + ' ' + FloatToStr(Points[i].y);
 end;
 
 function TVisibleFigure.Save: StringArray;
@@ -474,6 +481,7 @@ begin
   Inherited;
   Result := Inherited;
   setlength(Result,length(Result)+3);
+  Result[0] := IntToStr(length(Result)-1);
   Result[high(Result)-2] := ColorToString(FigurePenColor);
   Result[high(Result)-1] := ColorToString (FigureBrushColor);
   Result[high(Result)] := IntToStr(FigurePenWidth);
@@ -484,6 +492,7 @@ begin
   Inherited;
   Result := Inherited;
   Setlength(Result,length(Result)+1);
+  Result[0] := IntToStr(length(Result)-1);
   Result[high(Result)] := GetEnumName(TypeInfo(TFPPenStyle),ord(FigurePenStyle));
 end;
 
@@ -492,6 +501,7 @@ begin
   Inherited;
   Result := Inherited;
   Setlength(Result,length(Result)+1);
+  Result[0] := IntToStr(length(Result)-1);
   Result[high(Result)] := GetEnumName(TypeInfo(TBrushStyle),ord(FigureBrushStyle));
 end;
 
@@ -500,6 +510,7 @@ begin
   Inherited;
   Result := Inherited;
   Setlength(Result,length(Result)+1);
+  Result[0] := IntToStr(length(Result)-1);
   Result[high(Result)] := IntToStr(FigureR.x) + ' ' + IntToStr(FigureR.y);
 end;
 
@@ -508,9 +519,69 @@ begin
   Inherited;
   Result := Inherited;
   setlength(Result,length(Result)+3);
+  Result[0] := IntToStr(length(Result)-1);
   Result[high(Result)-2] := IntToStr(FigureCorners);
   Result[high(Result)-1] := FloatToStr(FigureAngle);
   Result[high(Result)] := BoolToStr(FigureAngleMode,'true','false');
+end;
+
+procedure TFigure.Load(AParams: StringArray);
+var
+  ptsNumber: integer;
+  i,cnt: integer;
+begin
+  delete(AParams[1],1,1);
+  ptsNumber := WordCount(AParams[1],[' ']) div 2;
+  setlength(Points,ptsNumber);
+  //ShowMessage(IntToStr(PtsNumber));
+  i := -1;
+  cnt := -1;
+  WHILE (cnt+1 < ptsNumber) do
+  begin
+    inc(cnt);
+    inc(i);
+    Points[cnt].x := StrToFloatDef(ExtractWord(i+1,aParams[1],[' ']),0);
+    //ShowMessage(IntToStr(cnt)+' '+FloatToStr(Points[cnt].x));
+    inc(i);
+    Points[cnt].y := StrToFloatDef(ExtractWord(i+1,aParams[1],[' ']),0);
+    //ShowMessage(IntToStr(cnt)+' '+FloatToStr(Points[cnt].y));
+  end;
+end;
+
+procedure TVisibleFigure.Load(AParams: StringArray);
+begin
+  Inherited;
+  FigurePenColor := StringToColor(AParams[2]);
+  FigureBrushColor := StringToColor(AParams[3]);
+  FigurePenWidth := StrToIntDef(AParams[4],1);
+end;
+
+procedure TPenSTyleFigure.Load(AParams: StringArray);
+begin
+  Inherited;
+  FigurePenStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle),
+  AParams[5]));
+end;
+
+procedure TBrushSTyleFigure.Load(AParams: StringArray);
+begin
+  Inherited;
+  FigureBrushStyle := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle),
+  AParams[6]));
+end;
+
+procedure TPolygon.Load(AParams: StringArray);
+begin
+  Inherited;
+  FigureCorners := StrToIntDef(AParams[7],3);
+  FigureAngle := StrToFloat(AParams[8]);
+end;
+
+procedure TRoundRect.Load(AParams: StringArray);
+begin
+  Inherited;
+  FigureR.x := StrToIntDef(ExtractWord(1,aParams[7],[' ']),0);
+  FigureR.y := StrToIntDef(ExtractWord(2,aParams[7],[' ']),0);
 end;
 
 initialization
