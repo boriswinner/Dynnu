@@ -187,6 +187,7 @@ object MainForm: TMainForm
       Caption = 'File'
       object SaveMenuItem: TMenuItem
         Caption = 'Save'
+        OnClick = SaveMenuItemClick
       end
       object SaveAsMenuItem: TMenuItem
         Caption = 'Save As'

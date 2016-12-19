@@ -12,6 +12,7 @@ type
   TFigureClass    = class  of TFigure;
   tempPointsArray = array[0..3] of TPoint;
   PolygonPointsArray = array of TPoint;
+  StringArray = array of string;
 
   TFigure = class (TPersistent)
   public
@@ -21,6 +22,7 @@ type
     procedure Draw(Canvas: TCanvas); virtual;
     procedure DrawSelection(Pt1,Pt2: TPoint; Canvas: TCanvas); virtual;
     procedure SetRegion; virtual; abstract;
+    function Save: StringArray; virtual;
   end;
 
   TVisibleFigure = class (TFigure)
@@ -28,6 +30,7 @@ type
     FigurePenColor,FigureBrushColor: TColor;
     FigurePenWidth: integer;
     procedure Draw(Canvas: TCanvas); override;
+    function Save: StringArray override;
   end;
 
   TInvisibleFigure = class (TFigure)
@@ -38,14 +41,16 @@ type
   TPenStyleFigure = class (TVisibleFigure)
   public
     FigurePenStyle: TPenStyle;
+   function Save: StringArray; override;
   end;
 
   TBrushStyleFigure = class (TPenStyleFigure)
   public
     FigureBrushStyle: TBrushStyle;
+    function Save: StringArray; override;
   end;
 
-  TPolyline       = class(TPenStyleFigure)
+  TPolyline       = class(TVisibleFigure)
   public
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
@@ -74,6 +79,7 @@ type
     FigureR: TPoint;
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
+    function Save: StringArray; override;
   end;
 
   TPolygon = class(TBrushStyleFigure)
@@ -85,6 +91,7 @@ type
     function Rotate(P1,P2: TFloatPoint; angle: double): TFloatPoint;
     function CreatePolygon (P1,P2: TFloatPoint; AFigureCorners: integer; AFigureAngle: double; AFigureAngleMode: boolean): PolygonPointsArray;
     procedure SetRegion; override;
+    function Save: StringArray; override;
   end;
 
   THandFigure     = class(TInvisibleFigure)
@@ -448,6 +455,62 @@ begin
     PolygonPoints[i].y := P1.Y + r*sin(i*k/180*Pi);
     Result[i] := WorldToScreen(Rotate(P1,PolygonPoints[i],AFigureAngle));
   end;
+  FigureAngle := AFigureAngle;
+end;
+
+function TFigure.Save: StringArray;
+var
+  i: integer;
+begin
+  setlength(Result,2);
+  Result[0] := ClassName;
+  Result[1] := '';
+  for i := low(Points) to high(Points) do
+    Result[1] := Result[1] + ' ' + FloatToStr(Points[i].x) + ' ' + FloatToStr(Points[i].y);
+end;
+
+function TVisibleFigure.Save: StringArray;
+begin
+  Inherited;
+  Result := Inherited;
+  setlength(Result,length(Result)+3);
+  Result[high(Result)-2] := ColorToString(FigurePenColor);
+  Result[high(Result)-1] := ColorToString (FigureBrushColor);
+  Result[high(Result)] := IntToStr(FigurePenWidth);
+end;
+
+function TPenStyleFigure.Save: StringArray;
+begin
+  Inherited;
+  Result := Inherited;
+  Setlength(Result,length(Result)+1);
+  Result[high(Result)] := GetEnumName(TypeInfo(TFPPenStyle),ord(FigurePenStyle));
+end;
+
+function TBrushStyleFigure.Save: StringArray;
+begin
+  Inherited;
+  Result := Inherited;
+  Setlength(Result,length(Result)+1);
+  Result[high(Result)] := GetEnumName(TypeInfo(TBrushStyle),ord(FigureBrushStyle));
+end;
+
+function TRoundRect.Save: StringArray;
+begin
+  Inherited;
+  Result := Inherited;
+  Setlength(Result,length(Result)+1);
+  Result[high(Result)] := IntToStr(FigureR.x) + ' ' + IntToStr(FigureR.y);
+end;
+
+function TPolygon.Save: StringArray;
+begin
+  Inherited;
+  Result := Inherited;
+  setlength(Result,length(Result)+3);
+  Result[high(Result)-2] := IntToStr(FigureCorners);
+  Result[high(Result)-1] := FloatToStr(FigureAngle);
+  Result[high(Result)] := BoolToStr(FigureAngleMode,'true','false');
 end;
 
 initialization

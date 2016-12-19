@@ -46,6 +46,7 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure SaveAsMenuItemClick(Sender: TObject);
+    procedure SaveMenuItemClick(Sender: TObject);
     procedure ScrollBarScroll(Sender: TObject;
       ScrollCode: TScrollCode; var ScrollPos: Integer);
     procedure MainPaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
@@ -68,6 +69,8 @@ type
     procedure MainPaintBoxPaint(Sender: TObject);
     procedure ScrollBarChange(Sender: TObject);
     procedure ZoomSpinEditChange(Sender: TObject);
+    procedure WriteToFile(AFileName: string);
+    procedure UpdateCaption;
   private
     { private declarations }
     CurrentTool: TTool;
@@ -76,7 +79,9 @@ type
     BotScrollCent,RightScrollCent: integer;
     ScrollBool,RBtn: boolean;
     PropPanel: TPanel;
-    ImageName, signature: string;
+    ImageName, LastSavedFile: string;
+    FileWasChanged, FileWasSaved: boolean;
+    const signature = '@DYNNUVECTORIMAGE';
   public
     { public declarations }
   end;
@@ -92,6 +97,8 @@ implementation
 procedure TMainForm.MainPaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
+  FileWasChanged := true;
+  UpdateCaption;
   if (ssRight in Shift) then RBtn := true;
   CurrentTool.FigureCreate(CurrentTool.FigureClass,Point(X,Y));
   Invalidate;
@@ -156,7 +163,9 @@ begin
   HorizontalScrollBar.max := MainPaintBox.Width;
   VerticalScrollBar.max   := MainPaintBox.Height;
 
-  signature := 'DYNNUVECTORIMAGE';
+  ImageName := 'Image1.dvimg';
+  UpdateCaption;
+  //FileWasChanged := false;
 end;
 
 procedure TMainForm.AboutMenuItemClick(Sender: TObject);
@@ -206,7 +215,7 @@ end;
 
 procedure TMainForm.SaveAsMenuItemClick(Sender: TObject);
 var
-  f: text;
+  f: TextFile;
   Reply,BoxStyle: Integer;
   tempObject: TObject;
 begin
@@ -217,11 +226,10 @@ begin
     Title := 'Save image as Dynnu Vector Image';
     DefaultExt:= 'dvimg';
     Filter := 'Dynnu Vector Image|*.dvimg|';
-    FileName:= 'Image';
+    FileName:= ImageName;
   end;
   if SaveImageDialog.Execute then
   begin
-    AssignFile(f,SaveImageDialog.FileName);
     if FileExists(SaveImageDialog.FileName) then
     begin
       BoxStyle := MB_ICONQUESTION + MB_YESNO;
@@ -229,9 +237,7 @@ begin
       'Overwrite file dialog', BoxStyle);
       if (Reply = IDYES) then
       begin
-        rewrite(f);
-        writeln(f,signature);
-        CloseFile(f);
+        WriteToFile(SaveImageDialog.FileName);
       end else
       begin
         SaveImageDialog.Free;
@@ -242,12 +248,46 @@ begin
       end;
     end else
     begin
-      rewrite(f);
-      writeln(f,signature);
-      CloseFile(f);
+      WriteToFile(SaveImageDialog.FileName);
     end;
   end;
   SaveImageDialog.Free;
+end;
+
+procedure TMainForm.SaveMenuItemClick(Sender: TObject);
+begin
+  if (LastSavedFile=ImageName) then
+    WriteToFile(ImageName)
+  else
+    SaveAsMenuItemClick(TObject.Create);
+end;
+
+procedure TMainForm.WriteToFile(AFileName: string);
+var
+  f: TextFile;
+  i,j: integer;
+begin
+  AssignFile(f,AFileName);
+  DeleteFile(AFileName);
+  rewrite(f);
+  writeln(f,signature);
+  writeln(f,length(Figures));
+  for i := low(Figures) to high(Figures) do
+  begin
+    for j := low((Figures[i]).Save) to high((Figures[i]).Save) do
+      writeln(f,(Figures[i]).Save[j]);
+  end;
+  CloseFile(f);
+  ImageName := AFileName;
+  LastSavedFile := AFileName;
+  FileWasChanged:=false;
+  UpdateCaption;
+end;
+
+procedure TMainForm.UpdateCaption;
+begin
+  MainForm.Caption := 'Dynnu - ' + ImageName;
+  if FileWasChanged then MainForm.Caption := MainForm.Caption + '*';
 end;
 
 procedure TMainForm.ScrollBarScroll(Sender: TObject;
