@@ -237,6 +237,10 @@ begin
   if OpenImageDialog.Execute then
   begin
     AssignFile(f,OpenImageDialog.FileName);
+    ImageName:= OpenImageDialog.FileName;
+    LastSavedFile := ImageName;
+    FileWasChanged:=false;
+    UpdateCaption;
     reset(f);
     readln(f,tSignature);
     if (tSignature<>signature) then
