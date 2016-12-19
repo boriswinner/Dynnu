@@ -187,14 +187,17 @@ object MainForm: TMainForm
       Caption = 'File'
       object SaveMenuItem: TMenuItem
         Caption = 'Save'
+        ShortCut = 16467
         OnClick = SaveMenuItemClick
       end
       object SaveAsMenuItem: TMenuItem
         Caption = 'Save As'
+        ShortCut = 24659
         OnClick = SaveAsMenuItemClick
       end
       object OpenMenuitem: TMenuItem
         Caption = 'Open '
+        ShortCut = 16463
         OnClick = OpenMenuitemClick
       end
       object ExitMenuItem: TMenuItem
