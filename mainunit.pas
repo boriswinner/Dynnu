@@ -28,6 +28,8 @@ type
     ExitMenuItem: TMenuItem;
     AboutMenuItem: TMenuItem;
     MainPaintBox: TPaintBox;
+    SaveMenuItem: TMenuItem;
+    SaveAsMenuItem: TMenuItem;
     ShowAllItem: TMenuItem;
     PaintPanel: TPanel;
     ColorsPanel: TPanel;
@@ -37,11 +39,13 @@ type
     ZoomLabel: TLabel;
     ZoomSpinEdit: TSpinEdit;
     ToolsPanel: TPanel;
+    SaveImageDialog: TSaveDialog;
     procedure AboutMenuItemClick(Sender: TObject);
     procedure AntiAliasingComboBoxChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure SaveAsMenuItemClick(Sender: TObject);
     procedure ScrollBarScroll(Sender: TObject;
       ScrollCode: TScrollCode; var ScrollPos: Integer);
     procedure MainPaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
@@ -72,6 +76,7 @@ type
     BotScrollCent,RightScrollCent: integer;
     ScrollBool,RBtn: boolean;
     PropPanel: TPanel;
+    ImageName, signature: string;
   public
     { public declarations }
   end;
@@ -150,6 +155,8 @@ begin
 
   HorizontalScrollBar.max := MainPaintBox.Width;
   VerticalScrollBar.max   := MainPaintBox.Height;
+
+  signature := 'DYNNUVECTORIMAGE';
 end;
 
 procedure TMainForm.AboutMenuItemClick(Sender: TObject);
@@ -195,6 +202,52 @@ procedure TMainForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
 begin
   if (key=VK_CONTROL) then
     CtrlBtn:= false;
+end;
+
+procedure TMainForm.SaveAsMenuItemClick(Sender: TObject);
+var
+  f: text;
+  Reply,BoxStyle: Integer;
+  tempObject: TObject;
+begin
+  SaveImageDialog := TSaveDialog.Create(self);
+  with SaveImageDialog do
+  begin
+    InitialDir := GetCurrentDir;
+    Title := 'Save image as Dynnu Vector Image';
+    DefaultExt:= 'dvimg';
+    Filter := 'Dynnu Vector Image|*.dvimg|';
+    FileName:= 'Image';
+  end;
+  if SaveImageDialog.Execute then
+  begin
+    AssignFile(f,SaveImageDialog.FileName);
+    if FileExists(SaveImageDialog.FileName) then
+    begin
+      BoxStyle := MB_ICONQUESTION + MB_YESNO;
+      Reply := Application.MessageBox('Overwrite file?',
+      'Overwrite file dialog', BoxStyle);
+      if (Reply = IDYES) then
+      begin
+        rewrite(f);
+        writeln(f,signature);
+        CloseFile(f);
+      end else
+      begin
+        SaveImageDialog.Free;
+        tempObject := TObject.Create;
+        SaveAsMenuItemClick(tempObject);
+        tempObject.Free;
+        exit;
+      end;
+    end else
+    begin
+      rewrite(f);
+      writeln(f,signature);
+      CloseFile(f);
+    end;
+  end;
+  SaveImageDialog.Free;
 end;
 
 procedure TMainForm.ScrollBarScroll(Sender: TObject;

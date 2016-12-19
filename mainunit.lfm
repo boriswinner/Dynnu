@@ -185,6 +185,13 @@ object MainForm: TMainForm
     left = 24
     object FileSubMenu: TMenuItem
       Caption = 'File'
+      object SaveMenuItem: TMenuItem
+        Caption = 'Save'
+      end
+      object SaveAsMenuItem: TMenuItem
+        Caption = 'Save As'
+        OnClick = SaveAsMenuItemClick
+      end
       object ExitMenuItem: TMenuItem
         Caption = 'Exit'
         OnClick = ExitMenuItemClick
