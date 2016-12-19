@@ -430,10 +430,8 @@ begin
         DeleteObject(Figures[i].FigureRegion);
         Figures[i].SetRegion;
         t := CreateRectRgn(1,1,2,2);
-        if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = false) then
-          Figures[i].Selected := true
-        else if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION)  and (Figures[i].Selected = true) then
-          Figures[i].Selected := false;
+        if CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION then
+          Figures[i].Selected := not Figures[i].Selected;
         DeleteObject(t);
     end;
   end;
