@@ -303,8 +303,8 @@ begin
   begin
     if (Figures[i].Selected) then
     begin
-      (Figures[i] as TVisibleFigure).FigurePenColor := PenColor;
-      (Figures[i] as TVisibleFigure).FigureBrushColor := BrushColor;
+      if (ssLeft in Shift) then(Figures[i] as TVisibleFigure).FigurePenColor := PenColor;
+      if (ssRight in Shift) then (Figures[i] as TVisibleFigure).FigureBrushColor := BrushColor;
     end;
   end;
   MainPaintBox.Invalidate;
