@@ -189,8 +189,6 @@ end;
 
 procedure TFigure.Draw(Canvas: TCanvas);
 begin
-  {Canvas.Pen.Color := FigurePenColor;
-  Canvas.Brush.Color := FigureBrushColor;}
 end;
 
 procedure TVisibleFigure.Draw(Canvas: TCanvas);
@@ -201,8 +199,6 @@ end;
 
 procedure TInvisibleFigure.Draw(Canvas: TCanvas);
 begin
-  {Canvas.Pen.Color := FigurePenColor;
-  Canvas.Brush.Color := FigureBrushColor;}
 end;
 
 
@@ -533,7 +529,6 @@ begin
   delete(AParams[1],1,1);
   ptsNumber := WordCount(AParams[1],[' ']) div 2;
   setlength(Points,ptsNumber);
-  //ShowMessage(IntToStr(PtsNumber));
   i := -1;
   cnt := -1;
   WHILE (cnt+1 < ptsNumber) do
@@ -541,10 +536,8 @@ begin
     inc(cnt);
     inc(i);
     Points[cnt].x := StrToFloatDef(ExtractWord(i+1,aParams[1],[' ']),0);
-    //ShowMessage(IntToStr(cnt)+' '+FloatToStr(Points[cnt].x));
     inc(i);
     Points[cnt].y := StrToFloatDef(ExtractWord(i+1,aParams[1],[' ']),0);
-    //ShowMessage(IntToStr(cnt)+' '+FloatToStr(Points[cnt].y));
   end;
 end;
 
