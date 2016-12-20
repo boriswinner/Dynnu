@@ -259,13 +259,10 @@ begin
       begin
         readln(f,tParams[j]);
       end;
-      case tParams[0] of
-      'TRectangle': tFigures[i] := TRectangle.Create;
-      'TPolyline': tFigures[i] := TPolyline.Create;
-      'TLine': tFigures[i] := TLine.Create;
-      'TEllipse': tFigures[i] := TEllipse.Create;
-      'TRoundRect': tFigures[i] := TRoundRect.Create;
-      'TPolygon': tFigures[i] := TPolygon.Create;
+      for j := low(ToolsRegister) to high(ToolsRegister) do
+      begin
+        if (ToolsRegister[j].FigureClass.ClassName=tParams[0]) then
+          tFigures[i] := ToolsRegister[j].FigureClass.Create;
       end;
       tFigures[i].Load(tParams);
     end;
