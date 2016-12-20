@@ -76,6 +76,7 @@ type
     procedure UpdateCaption;
   private
     { private declarations }
+    isDrawing: boolean;
     CurrentTool: TTool;
     Colors: array of TColor;
     ColorsFile: text;
@@ -104,6 +105,7 @@ begin
   FileWasChanged := true;
   UpdateCaption;
   if (ssRight in Shift) then RBtn := true;
+  isDrawing := true;
   CurrentTool.FigureCreate(CurrentTool.FigureClass,Point(X,Y));
   Invalidate;
 end;
@@ -169,7 +171,7 @@ begin
 
   ImageName := 'Image1.dvimg';
   UpdateCaption;
-  //FileWasChanged := false;
+  isDrawing := false;
 end;
 
 procedure TMainForm.AboutMenuItemClick(Sender: TObject);
@@ -365,20 +367,24 @@ end;
 procedure TMainForm.MainPaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  if (CurrentTool.ClassName = 'TRectSelectionTool') then
-  begin
-    FreeAndNil(PropPanel);
-    PropPanel := TPanel.Create(ToolsPanel);
-    PropPanel.Parent := ToolsPanel;
-    PropPanel.Align := alClient;
-    PropPanel.Name := 'PropPanel';
-    PropPanel.Caption := '';
-    CurrentTool.Initialize(PropPanel,MainPaintBox);
-  end;
-  CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
-  ZoomSpinEdit.Value := scalesunit.Zoom;
-  RBtn := false;
-  Invalidate;
+  if (isDrawing) then
+    begin
+      if (CurrentTool.ClassName = 'TRectSelectionTool') then
+      begin
+        FreeAndNil(PropPanel);
+        PropPanel := TPanel.Create(ToolsPanel);
+        PropPanel.Parent := ToolsPanel;
+        PropPanel.Align := alClient;
+        PropPanel.Name := 'PropPanel';
+        PropPanel.Caption := '';
+        CurrentTool.Initialize(PropPanel,MainPaintBox);
+      end;
+      isDrawing := false;
+      CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
+      ZoomSpinEdit.Value := scalesunit.Zoom;
+      RBtn := false;
+      Invalidate;
+    end;
 end;
 
 procedure TMainForm.MainPaintBoxResize(Sender: TObject);
@@ -467,9 +473,12 @@ end;
 procedure TMainForm.MainPaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 begin
-  if (ssLeft in Shift) then
-    CurrentTool.AddPoint(Point(X,Y));
-  Invalidate;
+  if (isDrawing) then
+  begin
+    if (ssLeft in Shift) then
+      CurrentTool.AddPoint(Point(X,Y));
+    Invalidate;
+  end;
 end;
 
 procedure TMainForm.MainPaintBoxPaint(Sender: TObject);
