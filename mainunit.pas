@@ -74,6 +74,8 @@ type
     procedure ScrollBarChange(Sender: TObject);
     procedure ZoomSpinEditChange(Sender: TObject);
     procedure WriteToFile(AFileName: string);
+    function ReadFromFile(AFileName: string): StringArray;
+    procedure LoadFromStringArray(AStringArray: StringArray);
     function SaveToStringArray: StringArray;
     procedure UpdateCaption;
   private
@@ -240,42 +242,68 @@ begin
   end;
   if OpenImageDialog.Execute then
   begin
-    AssignFile(f,OpenImageDialog.FileName);
     ImageName:= OpenImageDialog.FileName;
     LastSavedFile := ImageName;
     FileWasChanged:=false;
     UpdateCaption;
-    reset(f);
-    readln(f,tSignature);
-    if (tSignature<>signature) then
-    begin
-      ShowMessage('Invalid file');
-      CloseFile(f);
-      exit;
-    end;
-    readln(f,tLength);
-    setlength(tFigures,tLength);
-    for i := low(tFigures) to high(tFigures) do
-    begin
-      readln(f,t);
-      setlength(tParams,t);
-      for j := 0 to t-1 do
-      begin
-        readln(f,tParams[j]);
-      end;
-      for j := low(ToolsRegister) to high(ToolsRegister) do
-      begin
-        if (ToolsRegister[j].FigureClass.ClassName=tParams[0]) then
-          tFigures[i] := ToolsRegister[j].FigureClass.Create;
-      end;
-      tFigures[i].Load(tParams);
-    end;
-    CloseFile(f);
-    setlength(Figures,length(tFigures));
-    for i := low(tFigures) to high(tFigures) do
-      Figures[i] := tFigures[i];
+    LoadFromStringArray(ReadFromFile(OpenImageDialog.FileName));
     MainPaintBox.Invalidate;
   end;
+end;
+
+function TMainForm.ReadFromFile(AFileName: string): StringArray;
+var
+  f: TextFile;
+begin
+  AssignFile(f,AFileName);
+  reset(f);
+  setlength(Result,1);
+  readln(f,Result[0]);
+  if (Result[0]<>signature) then
+  begin
+    ShowMessage('Invalid file');
+    setlength(Result,0);
+    CloseFile(f);
+    exit;
+  end;
+  while (not EOF(f)) do
+  begin
+    setlength(Result,length(Result)+1);
+    readln(f,Result[high(Result)]);
+  end;
+  CloseFile(f);
+end;
+
+procedure TMainForm.LoadFromStringArray(AStringArray: StringArray);
+var
+  tFigures: array of TFigure;
+  tLength,t: integer;
+  i,j: integer;
+  tParams: StringArray;
+  cnt: integer;
+begin
+  setlength(tFigures,StrToInt(AStringArray[1]));
+  cnt := 1;
+  for i := low(tFigures) to high(tFigures) do
+  begin
+    inc(cnt);
+    t := StrToInt(AStringArray[cnt]);
+    setlength(tParams,t);
+    for j := 0 to t-1 do
+    begin
+      inc(cnt);
+      tParams[j] := AStringArray[cnt];
+    end;
+    for j := low(ToolsRegister) to high(ToolsRegister) do
+    begin
+      if (ToolsRegister[j].FigureClass.ClassName=tParams[0]) then
+        tFigures[i] := ToolsRegister[j].FigureClass.Create;
+    end;
+    tFigures[i].Load(tParams);
+  end;
+  setlength(Figures,length(tFigures));
+  for i := low(tFigures) to high(tFigures) do
+    Figures[i] := tFigures[i];
 end;
 
 procedure TMainForm.SaveAsMenuItemClick(Sender: TObject);
