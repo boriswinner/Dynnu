@@ -11,6 +11,7 @@ uses
 
 type
   TFigureClass = figuresunit.TFigureClass;
+  StringArray = figuresunit.StringArray;
 
   { TMainForm }
 
@@ -73,6 +74,7 @@ type
     procedure ScrollBarChange(Sender: TObject);
     procedure ZoomSpinEditChange(Sender: TObject);
     procedure WriteToFile(AFileName: string);
+    function SaveToStringArray: StringArray;
     procedure UpdateCaption;
   private
     { private declarations }
@@ -329,22 +331,35 @@ procedure TMainForm.WriteToFile(AFileName: string);
 var
   f: TextFile;
   i,j: integer;
+  tStrings: StringArray;
 begin
   AssignFile(f,AFileName);
   DeleteFile(AFileName);
   rewrite(f);
-  writeln(f,signature);
-  writeln(f,length(Figures));
-  for i := low(Figures) to high(Figures) do
-  begin
-    for j := low((Figures[i]).Save) to high((Figures[i]).Save) do
-      writeln(f,(Figures[i]).Save[j]);
-  end;
+  tStrings := SaveToStringArray;
+  for i := low(tStrings) to high(tStrings) do
+    writeln(f,tStrings[i]);
   CloseFile(f);
   ImageName := AFileName;
   LastSavedFile := AFileName;
   FileWasChanged:=false;
   UpdateCaption;
+end;
+
+function TMainForm.SaveToStringArray: StringArray;
+var
+  f: TextFile;
+  i,j: integer;
+begin
+  setlength(Result, 2);
+  Result[0] := signature;
+  Result[1] := IntToStr(length(Figures));
+  for i := low(Figures) to high(Figures) do
+  begin
+    setlength(Result,length(Result)+length(Figures[i].Save));
+    for j := low((Figures[i]).Save) to high((Figures[i]).Save) do
+      Result[high(Result)-(high((Figures[i]).Save)-j)] := Figures[i].Save[j];
+  end;
 end;
 
 procedure TMainForm.UpdateCaption;
