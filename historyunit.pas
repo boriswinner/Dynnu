@@ -5,46 +5,88 @@ unit historyunit;
 interface
 
 uses
-  Classes, SysUtils;
-const BufferLength = 100;
+  Classes, SysUtils,saveunit;
+
+const
+  BufferLength = 100;
+
 type
-  StringArray = array of string;
+  StringArray = saveunit.StringArray;
 
   TCycleBuffer = class
   public
     buffer: array [1..BufferLength] of StringArray;
-    position: integer;
+    position, AvaibleUndos, AvaibleRedos: integer;
     Constructor Create; overload;
-    procedure UpdateBuffer;
-    procedure CutOff(APos: integer);
+    procedure AddToBuffer;
+    procedure Undo;
+    procedure Redo;
+    procedure CutOff;
     function GetElement(APos: integer): StringArray;
   end;
+
+var
+  HistoryBuffer: TCycleBuffer;
 
 implementation
 
   constructor TCycleBuffer.Create;
   begin
     inherited;
-    position := 1;
+    position := 0;
+    AvaibleUndos := -1;
+    AvaibleRedos := 0;
   end;
 
-  procedure TCycleBuffer.UpdateBuffer;
+  procedure TCycleBuffer.AddToBuffer;
   begin
     inc(position);
+    if (AvaibleUndos < BufferLength) then
+      inc(AvaibleUndos);
     if position > BufferLength then
       position := 1;
-
+    buffer[position] :=  SaveToStringArray;
   end;
 
-  procedure TCycleBuffer.CutOff(APos: integer);
+  procedure TCycleBuffer.Undo;
   begin
-
+    if (AvaibleUndos>0) then
+    begin
+      dec(position);
+      dec(AvaibleUndos);
+      inc(AvaibleRedos);
+      if position < 1 then
+        position := BufferLength;
+      LoadFromStringArray(buffer[position]);
+    end;
   end;
 
-  function TCycleBuffer.GetElement(APos: integer): StringArray;
+  procedure TCycleBuffer.Redo;
   begin
-
+    if (AvaibleRedos > 0) then
+    begin
+      inc(position);
+      if (AvaibleUndos < BufferLength) then
+        inc(AvaibleUndos);
+      dec(AvaibleRedos);
+      if position > BufferLength then
+        position := 1;
+      LoadFromStringArray(buffer[position]);
+    end;
   end;
+
+  procedure TCycleBuffer.CutOff;
+  begin
+    AvaibleRedos := 0;
+  end;
+
+ function TCycleBuffer.GetElement(APos: integer): StringArray;
+ begin
+
+ end;
+
+ initialization
+ HistoryBuffer := TCycleBuffer.Create;
 
 end.
 

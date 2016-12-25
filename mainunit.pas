@@ -29,6 +29,9 @@ type
     ExitMenuItem: TMenuItem;
     AboutMenuItem: TMenuItem;
     MainPaintBox: TPaintBox;
+    EditSubMenu: TMenuItem;
+    UndoMenuItem: TMenuItem;
+    RedoMenuItem: TMenuItem;
     OpenMenuitem: TMenuItem;
     SaveMenuItem: TMenuItem;
     SaveAsMenuItem: TMenuItem;
@@ -49,6 +52,7 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure OpenMenuitemClick(Sender: TObject);
+    procedure RedoMenuItemClick(Sender: TObject);
     procedure SaveAsMenuItemClick(Sender: TObject);
     procedure SaveMenuItemClick(Sender: TObject);
     procedure ScrollBarScroll(Sender: TObject;
@@ -72,6 +76,7 @@ type
       Y: Integer);
     procedure MainPaintBoxPaint(Sender: TObject);
     procedure ScrollBarChange(Sender: TObject);
+    procedure UndoMenuItemClick(Sender: TObject);
     procedure ZoomSpinEditChange(Sender: TObject);
   private
     { private declarations }
@@ -192,6 +197,7 @@ begin
   VerticalScrollBar.Min   := round(WorldToScreen(MinFloatPoint).y);
   HorizontalScrollBar.Max := round(WorldToScreen(MaxFloatPoint).x);
   HorizontalScrollBar.Min := round(WorldToScreen(MinFloatPoint).x);
+  HistoryBuffer.AddToBuffer;
 end;
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
@@ -237,6 +243,12 @@ begin
     LoadFromStringArray(ReadFromFile(OpenImageDialog.FileName));
     MainPaintBox.Invalidate;
   end;
+end;
+
+procedure TMainForm.RedoMenuItemClick(Sender: TObject);
+begin
+  HistoryBuffer.Redo;
+  MainPaintBox.Invalidate;
 end;
 
 
@@ -319,6 +331,9 @@ begin
       CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
       ZoomSpinEdit.Value := scalesunit.Zoom;
       RBtn := false;
+      if (HistoryBuffer.AvaibleRedos > 0) then
+        HistoryBuffer.CutOff;
+      HistoryBuffer.AddToBuffer;
       Invalidate;
     end;
 end;
@@ -465,6 +480,12 @@ begin
   HorizontalScrollBar.Min := round(WorldToScreen(MinFloatPoint).x);
 
   Invalidate;
+end;
+
+procedure TMainForm.UndoMenuItemClick(Sender: TObject);
+begin
+  HistoryBuffer.Undo;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TMainForm.ZoomSpinEditChange(Sender: TObject);

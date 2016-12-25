@@ -209,6 +209,19 @@ object MainForm: TMainForm
         OnClick = ShowAllItemClick
       end
     end
+    object EditSubMenu: TMenuItem
+      Caption = 'Edit'
+      object UndoMenuItem: TMenuItem
+        Caption = 'Undo'
+        ShortCut = 16474
+        OnClick = UndoMenuItemClick
+      end
+      object RedoMenuItem: TMenuItem
+        Caption = 'Redo'
+        ShortCut = 16473
+        OnClick = RedoMenuItemClick
+      end
+    end
     object HelpSubMenu: TMenuItem
       Caption = 'Help'
       object AboutMenuItem: TMenuItem
