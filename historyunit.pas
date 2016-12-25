@@ -22,6 +22,7 @@ type
     procedure Undo;
     procedure Redo;
     procedure CutOff;
+    procedure DeleteBuffer;
     function GetElement(APos: integer): StringArray;
   end;
 
@@ -78,6 +79,13 @@ implementation
   procedure TCycleBuffer.CutOff;
   begin
     AvaibleRedos := 0;
+  end;
+
+  procedure TCycleBuffer.DeleteBuffer;
+  begin
+    AvaibleRedos := 0;
+    AvaibleUndos := -1;
+    position := 0;
   end;
 
  function TCycleBuffer.GetElement(APos: integer): StringArray;

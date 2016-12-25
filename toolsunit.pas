@@ -490,8 +490,8 @@ end;
 
 procedure TParameter.ChangeEditor(Sender: TObject);
 begin
-  HistoryBuffer.CutOff;
-  HistoryBuffer.AddToBuffer;
+   if (HistoryBuffer.AvaibleRedos > 0) then
+     HistoryBuffer.CutOff;
 end;
 
 procedure TLineStyleParameter.ChangeEditor(Sender: TObject);
@@ -506,6 +506,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPenStyleFigure).FigurePenStyle := PenStyle;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 
@@ -521,6 +522,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TBrushStyleFigure).FigureBrushStyle := BrushStyle;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 
@@ -535,6 +537,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TVisibleFigure).FigurePenWidth := PenWidth;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 
@@ -549,6 +552,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPolygon).FigureCorners := Corners;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 
@@ -563,6 +567,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPolygon).FigureAngle := Angle;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 
@@ -585,6 +590,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPolygon).FigureAngleMode := AngleMode;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 
@@ -599,6 +605,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TRoundRect).FigureR.x := RectR.x;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 
@@ -613,6 +620,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TRoundRect).FigureR.y := RectR.y;
   end;
+  HistoryBuffer.AddToBuffer;
   MainPaintBox.Invalidate;
 end;
 

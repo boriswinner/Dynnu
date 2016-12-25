@@ -244,6 +244,8 @@ begin
     LastSavedFile := ImageName;
     FileWasChanged:=false;
     LoadFromStringArray(ReadFromFile(OpenImageDialog.FileName));
+    HistoryBuffer.DeleteBuffer;
+    HistoryBuffer.AddToBuffer;
     MainPaintBox.Invalidate;
   end;
 end;
@@ -334,7 +336,7 @@ begin
       CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
       ZoomSpinEdit.Value := scalesunit.Zoom;
       RBtn := false;
-      if (not isInvisible) then
+      if (not isInvisible) or (CurrentTool is TMoveTool) then
       begin
         if (HistoryBuffer.AvaibleRedos > 0) then
           HistoryBuffer.CutOff;
