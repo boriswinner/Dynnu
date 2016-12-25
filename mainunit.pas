@@ -463,6 +463,12 @@ begin
   ScrollBool:=true;
   HorizontalScrollBar.Position:=Offset.x;
   VerticalScrollBar.Position:=Offset.y;
+  if (HistoryBuffer.AvaibleRedos=0) then
+    RedoMenuItem.Enabled := false else
+      RedoMenuItem.Enabled := true;
+  if (HistoryBuffer.AvaibleUndos=0) then
+    UndoMenuItem.Enabled := false else
+      UndoMenuItem.Enabled := true;
 end;
 
 procedure TMainForm.ScrollBarChange(Sender: TObject);
