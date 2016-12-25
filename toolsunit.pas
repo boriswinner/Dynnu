@@ -490,8 +490,8 @@ end;
 
 procedure TParameter.ChangeEditor(Sender: TObject);
 begin
-  ShowMessage('a');
   HistoryBuffer.CutOff;
+  HistoryBuffer.AddToBuffer;
 end;
 
 procedure TLineStyleParameter.ChangeEditor(Sender: TObject);
