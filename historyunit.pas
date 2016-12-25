@@ -42,7 +42,7 @@ implementation
   procedure TCycleBuffer.AddToBuffer;
   begin
     inc(position);
-    if (AvaibleUndos < BufferLength) then
+    if (AvaibleUndos < BufferLength-1) then
       inc(AvaibleUndos);
     if position > BufferLength then
       position := 1;
