@@ -578,6 +578,9 @@ begin
 end;
 
 initialization
+RegisterClasses([TFigure,TVisibleFigure,TInvisibleFigure,TPenStyleFigure,
+  TBrushStyleFigure, TPolyline,TLine,TRectangle,TEllipse,TPolygon,TRoundRect,
+  THandFigure,TMagnifierFrame]);
 PenWidth := 1;
 Corners := 3;
 end.

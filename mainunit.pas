@@ -30,6 +30,7 @@ type
     AboutMenuItem: TMenuItem;
     MainPaintBox: TPaintBox;
     EditSubMenu: TMenuItem;
+    SpinEdit1: TSpinEdit;
     UndoMenuItem: TMenuItem;
     RedoMenuItem: TMenuItem;
     OpenMenuitem: TMenuItem;
@@ -80,7 +81,7 @@ type
     procedure ZoomSpinEditChange(Sender: TObject);
   private
     { private declarations }
-    isDrawing: boolean;
+    isDrawing,isInvisible: boolean;
     CurrentTool: TTool;
     Colors: array of TColor;
     ColorsFile: text;
@@ -105,6 +106,8 @@ begin
   FileWasChanged := true;
   if (ssRight in Shift) then RBtn := true;
   isDrawing := true;
+  if (CurrentTool is TInvisibleTool) then isInvisible:=true else
+      isInvisible:=false;
   CurrentTool.FigureCreate(CurrentTool.FigureClass,Point(X,Y));
   Invalidate;
 end;
@@ -331,9 +334,12 @@ begin
       CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
       ZoomSpinEdit.Value := scalesunit.Zoom;
       RBtn := false;
-      if (HistoryBuffer.AvaibleRedos > 0) then
-        HistoryBuffer.CutOff;
-      HistoryBuffer.AddToBuffer;
+      if (not isInvisible) then
+      begin
+        if (HistoryBuffer.AvaibleRedos > 0) then
+          HistoryBuffer.CutOff;
+        HistoryBuffer.AddToBuffer;
+      end;
       Invalidate;
     end;
 end;

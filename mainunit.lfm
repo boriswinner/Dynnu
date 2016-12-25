@@ -181,6 +181,13 @@ object MainForm: TMainForm
       ParentColor = False
     end
   end
+  object SpinEdit1: TSpinEdit
+    Left = 10
+    Height = 23
+    Top = 10
+    Width = 50
+    TabOrder = 3
+  end
   object MainMenu: TMainMenu
     left = 24
     object FileSubMenu: TMenuItem

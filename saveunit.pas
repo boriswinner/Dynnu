@@ -5,7 +5,7 @@ unit saveunit;
 interface
 
 uses
-  Classes, SysUtils,toolsunit,figuresunit,Dialogs;
+  Classes, SysUtils,figuresunit,Dialogs;
 
 const
   signature = '@DYNNUVECTORIMAGE';
@@ -44,11 +44,7 @@ begin
       inc(cnt);
       tParams[j] := AStringArray[cnt];
     end;
-    for j := low(ToolsRegister) to high(ToolsRegister) do
-    begin
-      if (ToolsRegister[j].FigureClass.ClassName=tParams[0]) then
-        tFigures[i] := ToolsRegister[j].FigureClass.Create;
-    end;
+    tFigures[i] := TFigure(GetClass(tParams[0]).Create);
     tFigures[i].Load(tParams);
   end;
   setlength(Figures,length(tFigures));

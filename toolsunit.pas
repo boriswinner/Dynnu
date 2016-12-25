@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
   ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo, LCL,
-  figuresunit,scalesunit;
+  figuresunit,historyunit,scalesunit;
 
 type
 
@@ -136,7 +136,7 @@ type
   TParameter = class
   public
     procedure CreateEditor (APanel: TPanel); virtual; abstract;
-    procedure ChangeEditor (Sender: TObject); virtual; abstract;
+    procedure ChangeEditor (Sender: TObject); virtual;
     procedure StyleComboBoxDrawItem(Control: TWinControl;
       Index: Integer; ARect: TRect; State: TOwnerDrawState);
   end;
@@ -488,10 +488,17 @@ begin
   setlength(Figures,length(Figures)-1);
 end;
 
+procedure TParameter.ChangeEditor(Sender: TObject);
+begin
+  ShowMessage('a');
+  HistoryBuffer.CutOff;
+end;
+
 procedure TLineStyleParameter.ChangeEditor(Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   figuresunit.PenStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
   for i := low(Figures) to high(Figures) do
@@ -506,6 +513,7 @@ procedure TFillStyleParameter.ChangeEditor(Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   figuresunit.BrushStyle := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle),
   (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex]));
   for i := low(Figures) to high(Figures) do
@@ -520,6 +528,7 @@ procedure TLineWidthParameter.ChangeEditor (Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   PenWidth := (Sender as TSpinEdit).Value;
   for i := low(Figures) to high(Figures) do
   begin
@@ -533,6 +542,7 @@ procedure TCornersParameter.ChangeEditor (Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   Corners := (Sender as TSpinEdit).Value;
   for i := low(Figures) to high(Figures) do
   begin
@@ -546,6 +556,7 @@ procedure TAngleParameter.ChangeEditor (Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   Angle := ((Sender as TSpinEdit).Value*Pi)/180;
   for i := low(Figures) to high(Figures) do
   begin
@@ -559,6 +570,7 @@ procedure TAngleModeParameter.ChangeEditor (Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   if ((Sender as TCheckBox).Checked = true) then
   begin
     AngleSpinEdit.Enabled := true;
@@ -580,6 +592,7 @@ procedure TRoundingXParameter.ChangeEditor (Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   RectR.x := (Sender as TSpinEdit).Value;
   for i := low(Figures) to high(Figures) do
   begin
@@ -593,6 +606,7 @@ procedure TRoundingYParameter.ChangeEditor (Sender: TObject);
 var
   i: integer;
 begin
+  Inherited;
   RectR.y := (Sender as TSpinEdit).Value;
   for i := low(Figures) to high(Figures) do
   begin
@@ -614,12 +628,12 @@ begin
   LineWidthSpinEdit.MaxValue := 100;
   LineWidthSpinEdit.MinValue := 1;
   LineWidthSpinEdit.Value := PenWidth;
-  LineWidthSpinEdit.OnChange := @ChangeEditor;
   l := TLabel.Create(APanel);
   l.name := 'LineWidthLabel';
   l.Caption := 'Line Width';
   l.Parent := APanel;
   l.Align := alBottom;
+  LineWidthSpinEdit.OnChange := @ChangeEditor;
 end;
 
 procedure TCornersParameter.CreateEditor(APanel: TPanel);
@@ -634,12 +648,12 @@ begin
   CornersSpinEdit.MaxValue := 50;
   CornersSpinEdit.MinValue := 3;
   CornersSpinEdit.Value := Corners;
-  CornersSpinEdit.OnChange := @ChangeEditor;
   l := TLabel.Create(APanel);
   l.name := 'CornersLabel';
   l.Caption := 'Number of corners';
   l.Parent := APanel;
   l.Align := alBottom;
+  CornersSpinEdit.OnChange := @ChangeEditor;
 end;
 
 procedure TAngleParameter.CreateEditor(APanel: TPanel);
@@ -653,13 +667,13 @@ begin
   AngleSpinEdit.MaxValue := 360;
   AngleSpinEdit.MinValue := 0;
   AngleSpinEdit.Value := Angle;
-  AngleSpinEdit.OnChange := @ChangeEditor;
   AngleSpinEdit.Enabled := false;
   l := TLabel.Create(APanel);
   l.name := 'AngleLabel';
   l.Caption := 'Rotate Angle';
   l.Parent := APanel;
   l.Align := alBottom;
+  AngleSpinEdit.OnChange := @ChangeEditor;
 end;
 procedure TAngleModeParameter.CreateEditor(APanel: TPanel);
 var
@@ -669,8 +683,8 @@ begin
   c.Parent := APanel;
   c.name := 'AngleModeCheckBox';
   c.caption := 'Manual angle control';
-  c.onChange := @ChangeEditor;
   c.Align := alBottom;
+  c.onChange := @ChangeEditor;
 end;
 
 procedure TRoundingXParameter.CreateEditor(APanel: TPanel);
@@ -733,9 +747,9 @@ begin
   LineStyleComboBox.Items.Add(GetEnumName(TypeInfo(TFPPenStyle),
     ord(high(TFPPenStyle))));
   LineStyleComboBox.ItemIndex := ord(PenStyle);
-  LineStyleComboBox.OnSelect  := @ChangeEditor;
   LineStyleComboBox.Style := csOwnerDrawFixed;
   LineStyleComboBox.OnDrawItem := @StyleComboBoxDrawItem;
+  LineStyleComboBox.OnSelect  := @ChangeEditor;
   l := TLabel.Create(APanel);
   l.name := 'LineStyleLabel';
   l.Caption := 'Line Style';
@@ -790,9 +804,9 @@ begin
     FillStyleComboBox.Items.Add(GetEnumName(TypeInfo(TBrushStyle),i));
   end;
   FillStyleComboBox.ItemIndex := ord(BrushStyle);
-  FillStyleComboBox.OnSelect  := @ChangeEditor;
   FillStyleComboBox.Style := csOwnerDrawFixed;
   FillStyleComboBox.OnDrawItem := @StyleComboBoxDrawItem;
+  FillStyleComboBox.OnSelect  := @ChangeEditor;
   l := TLabel.Create(APanel);
   l.name := 'FillStyleLabel';
   l.Caption := 'Fill Style';
