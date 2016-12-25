@@ -7,12 +7,12 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus, strutils,
   ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo, LCL, Windows,
-  scalesunit;
+  scalesunit, historyunit;
 type
   TFigureClass    = class  of TFigure;
   tempPointsArray = array[0..3] of TPoint;
   PolygonPointsArray = array of TPoint;
-  StringArray = array of string;
+  StringArray = historyunit.StringArray;
 
   TFigure = class (TPersistent)
   public
