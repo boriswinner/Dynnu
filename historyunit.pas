@@ -16,13 +16,14 @@ type
   TCycleBuffer = class
   public
     buffer: array [1..BufferLength] of StringArray;
-    position, AvaibleUndos, AvaibleRedos: integer;
+    position, savedposition, AvaibleUndos, AvaibleRedos: integer;
     Constructor Create; overload;
     procedure AddToBuffer;
     procedure Undo;
     procedure Redo;
     procedure CutOff;
     procedure DeleteBuffer;
+    function ShowAsterisk: boolean;
     function GetElement(APos: integer): StringArray;
   end;
 
@@ -34,9 +35,7 @@ implementation
   constructor TCycleBuffer.Create;
   begin
     inherited;
-    position := 0;
-    AvaibleUndos := -1;
-    AvaibleRedos := 0;
+    DeleteBuffer;
   end;
 
   procedure TCycleBuffer.AddToBuffer;
@@ -86,6 +85,15 @@ implementation
     AvaibleRedos := 0;
     AvaibleUndos := -1;
     position := 0;
+    savedposition := 1;
+  end;
+
+  function TCycleBuffer.ShowAsterisk: boolean;
+  begin
+    if (position <> savedposition) then
+      Result := true
+    else
+      Result := false;
   end;
 
  function TCycleBuffer.GetElement(APos: integer): StringArray;

@@ -282,6 +282,7 @@ begin
       if (Reply = IDYES) then
       begin
         WriteToFile(SaveImageDialog.FileName);
+        HistoryBuffer.savedposition := HistoryBuffer.position;
       end else
       begin
         SaveImageDialog.Free;
@@ -293,9 +294,11 @@ begin
     end else
     begin
       WriteToFile(SaveImageDialog.FileName);
+      HistoryBuffer.savedposition := HistoryBuffer.position;
     end;
   end;
   SaveImageDialog.Free;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TMainForm.SaveMenuItemClick(Sender: TObject);
@@ -477,6 +480,11 @@ begin
   if (HistoryBuffer.AvaibleUndos=0) then
     UndoMenuItem.Enabled := false else
       UndoMenuItem.Enabled := true;
+
+  if (HistoryBuffer.ShowAsterisk) then
+    MainForm.Caption:='Dynnu - '+ImageName+'*'
+  else
+    MainForm.Caption:='Dynnu - '+ImageName;
 end;
 
 procedure TMainForm.ScrollBarChange(Sender: TObject);
