@@ -8,7 +8,12 @@ uses
   Classes, SysUtils,saveunit;
 
 const
-  BufferLength = 100;
+  BufferLength = 3;
+  ActionCreate = 'Created Canvas';
+  ActionOpen = 'Opened File';
+  ActionDraw = 'Drew Item';
+  ActionChange = 'Changed Properties';
+  ActionMove = 'Moved Item';
 
 type
   StringArray = saveunit.StringArray;
@@ -16,14 +21,18 @@ type
   TCycleBuffer = class
   public
     buffer: array [1..BufferLength] of StringArray;
+    action: array [1..BufferLength] of String;
     position, savedposition, AvaibleUndos, AvaibleRedos: integer;
     Constructor Create; overload;
-    procedure AddToBuffer;
+    procedure AddToBuffer(AAction: string);
     procedure Undo;
     procedure Redo;
     procedure CutOff;
     procedure DeleteBuffer;
     function ShowAsterisk: boolean;
+    procedure SetToState(APos: integer);
+    function UpdateSpos: integer;
+    function UpdateEpos: integer;
   end;
 
 var
@@ -37,14 +46,15 @@ implementation
     DeleteBuffer;
   end;
 
-  procedure TCycleBuffer.AddToBuffer;
+  procedure TCycleBuffer.AddToBuffer(AAction: string);
   begin
     inc(position);
     if (AvaibleUndos < BufferLength-1) then
       inc(AvaibleUndos);
     if position > BufferLength then
       position := 1;
-    buffer[position] :=  SaveToStringArray;
+    buffer[position] := SaveToStringArray;
+    action[position] := AAction;
   end;
 
   procedure TCycleBuffer.Undo;
@@ -93,6 +103,52 @@ implementation
       Result := true
     else
       Result := false;
+  end;
+
+  function TCycleBuffer.UpdateSpos: integer;
+  var
+    i: integer;
+  begin
+    Result := position;
+    if (AvaibleUndos=0) then exit;
+    for i := 1 to AvaibleUndos do
+    begin
+      dec(Result);
+      if (Result < 1) then Result := BufferLength;
+    end;
+  end;
+
+  function TCycleBuffer.UpdateEpos: integer;
+  var
+    i: integer;
+  begin
+    Result := position;
+    if (AvaibleRedos=0) then exit;
+    for i := 1 to AvaibleRedos do
+    begin
+      inc(Result);
+      if (Result > BufferLength) then Result := 1;
+    end;
+  end;
+
+  procedure TCycleBuffer.SetToState(APos: integer);
+  begin
+    if (position-APos > 0) then
+    begin
+      AvaibleUndos:=AvaibleUndos-(position-APos);
+      AvaibleRedos:=AvaibleRedos+(position-APos);
+    end;
+    if (position-APos < 0) then
+    begin
+      AvaibleRedos:=AvaibleRedos-(position-APos);
+      AvaibleUndos:=AvaibleUndos+(position-APos);
+    end;
+    position := APos;
+    if position < 1 then
+      position := BufferLength;
+    if position > BufferLength then
+       position := 1;
+    LoadFromStringArray(buffer[position]);
   end;
 
  initialization

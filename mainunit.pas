@@ -23,6 +23,7 @@ type
     ColorLabel2: TLabel;
     ColorsGrid: TDrawGrid;
     AntiAliasingComboBox: TComboBox;
+    HistoryListBox: TListBox;
     MainMenu: TMainMenu;
     FileSubMenu: TMenuItem;
     HelpSubMenu: TMenuItem;
@@ -30,6 +31,7 @@ type
     AboutMenuItem: TMenuItem;
     MainPaintBox: TPaintBox;
     EditSubMenu: TMenuItem;
+    HistoryPanel: TPanel;
     UndoMenuItem: TMenuItem;
     RedoMenuItem: TMenuItem;
     OpenMenuitem: TMenuItem;
@@ -51,6 +53,10 @@ type
     procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure HistoryListBoxKeyPress(Sender: TObject; var Key: char);
+    procedure HistoryListBoxMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure HistoryListBoxSelectionChange(Sender: TObject; User: boolean);
     procedure OpenMenuitemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
     procedure SaveAsMenuItemClick(Sender: TObject);
@@ -78,6 +84,7 @@ type
     procedure ScrollBarChange(Sender: TObject);
     procedure UndoMenuItemClick(Sender: TObject);
     procedure ZoomSpinEditChange(Sender: TObject);
+    procedure HistoryListBoxUpdate(Sender: TListBox);
   private
     { private declarations }
     isDrawing,isInvisible: boolean;
@@ -139,7 +146,7 @@ begin
   end;
   CloseFile(ColorsFile);
 
-  ColorsGrid.RowCount := length(Colors) div 3;
+  ColorsGrid.RowCount := length(Colors) div ColorsGrid.ColCount;
   ToolsPanel.Width    := 5 + 4*32 + 5;
   for i := low(ToolsRegister) to high(ToolsRegister) do
   begin
@@ -170,7 +177,6 @@ begin
   VerticalScrollBar.max   := MainPaintBox.Height;
 
   ImageName := 'Image1.dvimg';
-  isDrawing := false;
 end;
 
 procedure TMainForm.AboutMenuItemClick(Sender: TObject);
@@ -198,7 +204,7 @@ begin
   VerticalScrollBar.Min   := round(WorldToScreen(MinFloatPoint).y);
   HorizontalScrollBar.Max := round(WorldToScreen(MaxFloatPoint).x);
   HorizontalScrollBar.Min := round(WorldToScreen(MinFloatPoint).x);
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionCreate);
 end;
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
@@ -219,6 +225,42 @@ begin
     CtrlBtn:= false;
 end;
 
+procedure TMainForm.HistoryListBoxKeyPress(Sender: TObject; var Key: char);
+begin
+  MainPaintBox.Invalidate;
+end;
+
+procedure TMainForm.HistoryListBoxMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+
+  MainPaintBox.Invalidate;
+end;
+
+procedure TMainForm.HistoryListBoxSelectionChange(Sender: TObject; User: boolean
+  );
+var
+  destination,spos,epos: integer;
+begin
+  destination := (Sender as TListBox).ItemIndex+1;
+
+  while(HistoryBuffer.AvaibleUndos>0) do
+  begin
+    if (destination = HistoryBuffer.position) then
+      break;
+    HistoryBuffer.Undo;
+  end;
+  if (destination <> HistoryBuffer.position) then
+  begin
+    while(HistoryBuffer.AvaibleRedos>0) do
+    begin
+      if (destination = HistoryBuffer.position) then
+        break;
+      HistoryBuffer.Redo;
+    end;
+  end;
+end;
+
 procedure TMainForm.OpenMenuitemClick(Sender: TObject);
 begin
   OpenImageDialog := TOpenDialog.Create(Self);
@@ -235,7 +277,7 @@ begin
     LastSavedFile := ImageName;
     LoadFromStringArray(ReadFromFile(OpenImageDialog.FileName));
     HistoryBuffer.DeleteBuffer;
-    HistoryBuffer.AddToBuffer;
+    HistoryBuffer.AddToBuffer(ActionOpen);
     MainPaintBox.Invalidate;
   end;
 end;
@@ -333,8 +375,9 @@ begin
       begin
         if (HistoryBuffer.AvaibleRedos > 0) then
           HistoryBuffer.CutOff;
-        HistoryBuffer.AddToBuffer;
       end;
+      if (not isInvisible) then
+        HistoryBuffer.AddToBuffer(ActionDraw);
       Invalidate;
     end;
 end;
@@ -467,6 +510,7 @@ begin
   ScrollBool:=true;
   HorizontalScrollBar.Position:=Offset.x;
   VerticalScrollBar.Position:=Offset.y;
+
   if (HistoryBuffer.AvaibleRedos=0) then
     RedoMenuItem.Enabled := false
   else
@@ -480,6 +524,28 @@ begin
     MainForm.Caption:='Dynnu - '+ImageName+'*'
   else
     MainForm.Caption:='Dynnu - '+ImageName;
+
+  HistoryListBoxUpdate(HistoryListBox);
+end;
+
+procedure TMainForm.HistoryListBoxUpdate(Sender: TListBox);
+var
+  spos,epos,i: integer;
+begin
+  Sender.Items.Clear;
+  spos := HistoryBuffer.UpdateSpos;
+  epos := HistoryBuffer.UpdateEpos;
+
+  for i := 1 to BufferLength do
+  begin
+    if (spos <= epos) and ((i >= spos) and (i <= epos)) then
+      Sender.Items.Add(HistoryBuffer.action[i]);
+    if (spos > epos) and (((i >= epos) and
+      (i <= BufferLength)) or ((i >= 1) and (i <= spos))) then
+        Sender.Items.Add(HistoryBuffer.action[i]);
+  end;
+  Sender.ItemIndex := HistoryBuffer.position-1;
+  Sender.TopIndex  := max(HistoryBuffer.position-3,0);
 end;
 
 procedure TMainForm.ScrollBarChange(Sender: TObject);

@@ -198,6 +198,7 @@ var
   CtrlBtn: boolean;
   MainPaintBox: TPaintBox;
   tempSelection: integer;
+  updateHistory: boolean;
 implementation
 
 procedure TTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
@@ -484,6 +485,7 @@ begin
   Figures[tempSelection].Selected := false;
   tempSelection:=0;
   setlength(Figures,length(Figures)-1);
+  HistoryBuffer.AddToBuffer(ActionMove);
 end;
 
 procedure TParameter.ChangeEditor(Sender: TObject);
@@ -504,7 +506,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPenStyleFigure).FigurePenStyle := PenStyle;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
@@ -520,7 +522,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TBrushStyleFigure).FigureBrushStyle := BrushStyle;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
@@ -535,7 +537,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TVisibleFigure).FigurePenWidth := PenWidth;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
@@ -550,7 +552,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPolygon).FigureCorners := Corners;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
@@ -565,7 +567,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPolygon).FigureAngle := Angle;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
@@ -588,7 +590,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TPolygon).FigureAngleMode := AngleMode;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
@@ -603,7 +605,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TRoundRect).FigureR.x := RectR.x;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
@@ -618,7 +620,7 @@ begin
     if (Figures[i].Selected) then
       (Figures[i] as TRoundRect).FigureR.y := RectR.y;
   end;
-  HistoryBuffer.AddToBuffer;
+  HistoryBuffer.AddToBuffer(ActionChange);
   MainPaintBox.Invalidate;
 end;
 
