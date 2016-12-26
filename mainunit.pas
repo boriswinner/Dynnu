@@ -30,7 +30,6 @@ type
     AboutMenuItem: TMenuItem;
     MainPaintBox: TPaintBox;
     EditSubMenu: TMenuItem;
-    SpinEdit1: TSpinEdit;
     UndoMenuItem: TMenuItem;
     RedoMenuItem: TMenuItem;
     OpenMenuitem: TMenuItem;
