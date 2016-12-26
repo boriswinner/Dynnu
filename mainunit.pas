@@ -539,10 +539,10 @@ begin
   for i := 1 to BufferLength do
   begin
     if (spos <= epos) and ((i >= spos) and (i <= epos)) then
-      Sender.Items.Add(IntToStr(spos)+' '+IntToStr(epos)+HistoryBuffer.action[i]);
+      Sender.Items.Add(HistoryBuffer.action[i]);
     if (spos > epos) and (((i >= epos) and
       (i <= BufferLength)) or ((i >= 1) and (i <= spos))) then
-        Sender.Items.Add(IntToStr(spos)+' '+IntToStr(epos)+HistoryBuffer.action[i]);
+        Sender.Items.Add(HistoryBuffer.action[i]);
   end;
   Sender.ItemIndex := min(HistoryBuffer.position-1,Sender.Items.Count-1);
   Sender.TopIndex  := max(HistoryBuffer.position-3,0);

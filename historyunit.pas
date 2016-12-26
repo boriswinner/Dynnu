@@ -8,7 +8,7 @@ uses
   Classes, SysUtils,saveunit;
 
 const
-  BufferLength = 3;
+  BufferLength = 100;
   ActionCreate = 'Created Canvas';
   ActionOpen = 'Opened File';
   ActionDraw = 'Drew Item';
