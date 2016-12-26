@@ -94,7 +94,8 @@ type
     FigureAngleMode: boolean;
     procedure Draw(Canvas:TCanvas); override;
     function Rotate(P1,P2: TFloatPoint; angle: double): TFloatPoint;
-    function CreatePolygon (P1,P2: TFloatPoint; AFigureCorners: integer; AFigureAngle: double; AFigureAngleMode: boolean): PolygonPointsArray;
+    function CreatePolygon (P1,P2: TFloatPoint; AFigureCorners: integer;
+      AFigureAngle: double; AFigureAngleMode: boolean): PolygonPointsArray;
     procedure SetRegion; override;
     function Save: StringArray; override;
     procedure Load(AParams: StringArray); override;
@@ -110,7 +111,8 @@ type
     procedure Draw(Canvas: TCanvas); override;
   end;
 
-  function CreateRectAroundLine(p1,p2: TPoint; FigurePenWidth: integer): tempPointsArray;
+  function CreateRectAroundLine(p1,p2: TPoint; FigurePenWidth: integer):
+    tempPointsArray;
 
 const
   inf:integer = 2147483647;
@@ -126,7 +128,8 @@ var
   Angle: double;
   RectR: TPoint;
 implementation
-function CreateRectAroundLine(p1,p2: TPoint; FigurePenWidth: integer): tempPointsArray;
+function CreateRectAroundLine(p1,p2: TPoint; FigurePenWidth: integer):
+  tempPointsArray;
 begin
   if (abs(p2.x-p1.x)>45) then
   begin
@@ -224,10 +227,14 @@ begin
   end;
   for i := low(Points) to High(Points) do
   begin
-    if (lP.x < WorldToScreen(Points[i]).x) then lP.x := WorldToScreen(Points[i]).x;
-    if (lP.y < WorldToScreen(Points[i]).y) then lP.y := WorldToScreen(Points[i]).y;
-    if (hP.x > WorldToScreen(Points[i]).x) then hP.x := WorldToScreen(Points[i]).x;
-    if (hP.y > WorldToScreen(Points[i]).y) then hP.y := WorldToScreen(Points[i]).y;
+    if (lP.x < WorldToScreen(Points[i]).x) then
+      lP.x := WorldToScreen(Points[i]).x;
+    if (lP.y < WorldToScreen(Points[i]).y) then
+      lP.y := WorldToScreen(Points[i]).y;
+    if (hP.x > WorldToScreen(Points[i]).x) then
+      hP.x := WorldToScreen(Points[i]).x;
+    if (hP.y > WorldToScreen(Points[i]).y) then
+      hP.y := WorldToScreen(Points[i]).y;
   end;
   if (Selected = true) then
   begin
@@ -249,7 +256,8 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),
+      WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -268,7 +276,8 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),
+      WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -285,7 +294,8 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),
+      WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -303,7 +313,8 @@ begin
   if (Selected = true) then
   begin
     DeleteObject(FigureRegion);
-    DrawSelection(WorldToScreen(Points[low(Points)]),WorldToScreen(Points[high(Points)]),Canvas);
+    DrawSelection(WorldToScreen(Points[low(Points)]),
+      WorldToScreen(Points[high(Points)]),Canvas);
   end;
 end;
 
@@ -334,7 +345,8 @@ begin
   lP.y := 0;
   hP.x := inf;
   hP.y := inf;
-  PolygonPointsScr := CreatePolygon(P1,P2,FigureCorners,FigureAngle,FigureAngleMode);
+  PolygonPointsScr := CreatePolygon(P1,P2,FigureCorners,FigureAngle,
+    FigureAngleMode);
   for i := low(PolygonPointsScr) to high (PolygonPointsScr) do
   begin
     if (lP.x < PolygonPointsScr[i].x) then lP.x := PolygonPointsScr[i].x;
@@ -377,7 +389,8 @@ var
 begin
   tempRect.TopLeft := WorldToScreen(Points[low(Points)]);
   tempRect.BottomRight := WorldToScreen(Points[high(Points)]);
-  FigureRegion := CreateRectRgn (tempRect.Left,tempRect.Top,tempRect.Right,tempRect.Bottom);
+  FigureRegion := CreateRectRgn(tempRect.Left,tempRect.Top,tempRect.Right,
+    tempRect.Bottom);
 end;
 
 procedure TEllipse.SetRegion;
@@ -386,7 +399,8 @@ var
 begin
   tempRect.TopLeft := WorldToScreen(Points[low(Points)]);
   tempRect.BottomRight := WorldToScreen(Points[high(Points)]);
-  FigureRegion := CreateEllipticRgn (tempRect.Left,tempRect.Top,tempRect.Right,tempRect.Bottom);
+  FigureRegion := CreateEllipticRgn(tempRect.Left,tempRect.Top,tempRect.Right,
+    tempRect.Bottom);
 end;
 
 procedure TRoundRect.SetRegion;
@@ -395,7 +409,8 @@ var
 begin
   tempRect.TopLeft := WorldToScreen(Points[low(Points)]);
   tempRect.BottomRight := WorldToScreen(Points[high(Points)]);
-  FigureRegion := CreateRoundRectRgn (tempRect.Left,tempRect.Top,tempRect.Right,tempRect.Bottom,RectR.x,RectR.y);
+  FigureRegion := CreateRoundRectRgn(tempRect.Left,tempRect.Top,tempRect.Right,
+    tempRect.Bottom,RectR.x,RectR.y);
 end;
 
 procedure TLine.SetRegion;
@@ -406,7 +421,7 @@ begin
   p1 := WorldToScreen(Points[low(Points)]);
   p2 := WorldToScreen(Points[high(Points)]);
   tempPoints := CreateRectAroundLine(p1,p2,FigurePenWidth);
-  FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
+  FigureRegion := CreatePolygonRgn(tempPoints,length(tempPoints),winding);
 end;
 
 procedure TPolyline.SetRegion;
@@ -421,7 +436,8 @@ begin
     p1 := WorldToScreen(Points[i]);
     p2 := WorldToScreen(Points[i+1]);
     tempPoints := CreateRectAroundLine(p1,p2,FigurePenWidth);
-    if (i=low(Points)) then FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
+    if (i=low(Points)) then
+      FigureRegion := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
     curRgn := CreatePolygonRgn (tempPoints,length(tempPoints),winding);
     CombineRgn (FigureRegion,FigureRegion,curRgn,RGN_OR);
     DeleteObject(curRgn);
@@ -435,8 +451,10 @@ var
 begin
   P1 := Points[low(Points)];
   P2 := Points[high(Points)];
-  PolygonPointsScr := CreatePolygon(P1,P2,FigureCorners,FigureAngle,FigureAngleMode);
-  FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],length(PolygonPointsScr),winding);
+  PolygonPointsScr := CreatePolygon(P1,P2,FigureCorners,FigureAngle,
+    FigureAngleMode);
+  FigureRegion := CreatePolygonRgn (PolygonPointsScr[0],
+    length(PolygonPointsScr),winding);
 end;
 
 function TPolygon.CreatePolygon (P1,P2: TFloatPoint; AFigureCorners: integer;
@@ -448,7 +466,8 @@ var
 begin
   r := sqrt(abs(sqr(P2.x-P1.x) + sqr(P2.y-P1.y)));
   k:=360 div AFigureCorners;
-  if (not AFigureAngleMode) then AFigureAngle := Arctan2(p1.Y - p2.Y, p1.X - p2.X);
+  if (not AFigureAngleMode) then
+    AFigureAngle := Arctan2(p1.Y - p2.Y, p1.X - p2.X);
   setlength (PolygonPoints, AFigurecorners);
   setlength (Result, AFigurecorners);
   for i := low(PolygonPoints) to high(PolygonPoints) do
@@ -469,7 +488,8 @@ begin
   Result[1] := ClassName;
   Result[2] := '';
   for i := low(Points) to high(Points) do
-    Result[2] := Result[2] + ' ' + FloatToStr(Points[i].x) + ' ' + FloatToStr(Points[i].y);
+    Result[2] := Result[2]+' '+FloatToStr(Points[i].x)+' '+
+      FloatToStr(Points[i].y);
 end;
 
 function TVisibleFigure.Save: StringArray;
@@ -489,7 +509,8 @@ begin
   Result := Inherited;
   Setlength(Result,length(Result)+1);
   Result[0] := IntToStr(length(Result)-1);
-  Result[high(Result)] := GetEnumName(TypeInfo(TFPPenStyle),ord(FigurePenStyle));
+  Result[high(Result)] := GetEnumName(TypeInfo(TFPPenStyle),
+    ord(FigurePenStyle));
 end;
 
 function TBrushStyleFigure.Save: StringArray;
@@ -498,7 +519,8 @@ begin
   Result := Inherited;
   Setlength(Result,length(Result)+1);
   Result[0] := IntToStr(length(Result)-1);
-  Result[high(Result)] := GetEnumName(TypeInfo(TBrushStyle),ord(FigureBrushStyle));
+  Result[high(Result)] := GetEnumName(TypeInfo(TBrushStyle),
+    ord(FigureBrushStyle));
 end;
 
 function TRoundRect.Save: StringArray;

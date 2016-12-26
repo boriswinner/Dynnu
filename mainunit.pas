@@ -103,7 +103,6 @@ implementation
 procedure TMainForm.MainPaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  FileWasChanged := true;
   if (ssRight in Shift) then RBtn := true;
   isDrawing := true;
   if (CurrentTool is TInvisibleTool) then isInvisible:=true else
@@ -221,14 +220,7 @@ begin
     CtrlBtn:= false;
 end;
 
-
 procedure TMainForm.OpenMenuitemClick(Sender: TObject);
-var
-  f: text;
-  tFigures: array of TFigure;
-  tLength,t: integer;
-  i,j: integer;
-  tParams: StringArray;
 begin
   OpenImageDialog := TOpenDialog.Create(Self);
   with OpenImageDialog do
@@ -259,7 +251,6 @@ end;
 
 procedure TMainForm.SaveAsMenuItemClick(Sender: TObject);
 var
-  f: TextFile;
   Reply,BoxStyle: Integer;
   tempObject: TObject;
 begin
@@ -336,7 +327,8 @@ begin
         CurrentTool.Initialize(PropPanel,MainPaintBox);
       end;
       isDrawing := false;
-      CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width, RBtn,PropPanel);
+      CurrentTool.StopDraw(X,Y,MainPaintBox.Height, MainPaintBox.Width,
+        RBtn,PropPanel);
       ZoomSpinEdit.Value := scalesunit.Zoom;
       RBtn := false;
       if (not isInvisible) or (CurrentTool is TMoveTool) then
@@ -397,9 +389,10 @@ begin
   if ColorsGridColorDialog.Execute then
   begin
     PenColor := ColorsGridColorDialog.Color;
-    Colors[ColorsGrid.ColCount*((Sender as TDrawGrid).Row)+(Sender as TDrawGrid).Col] :=
-    ColorsGridColorDialog.Color;
-    ColorsGridDrawCell(Sender,(Sender as TDrawGrid).Col,(Sender as TDrawGrid).Row,Rect(1,1,1,1),aState);
+    Colors[ColorsGrid.ColCount*((Sender as TDrawGrid).Row)+
+      (Sender as TDrawGrid).Col] := ColorsGridColorDialog.Color;
+    ColorsGridDrawCell(Sender,(Sender as TDrawGrid).Col,
+      (Sender as TDrawGrid).Row,Rect(1,1,1,1),aState);
     ColorLabel1.Color := PenColor;
   end;
 end;
@@ -417,16 +410,20 @@ var
   Col,Row,i: integer;
 begin
   ColorsGrid.MouseToCell(X,Y,Col,Row);
-  if (ssLeft in Shift) then PenColor := Colors[ColorsGrid.ColCount*Row+Col];
-  if (ssRight in Shift) then BrushColor := Colors[ColorsGrid.ColCount*Row+Col];
+  if (ssLeft  in Shift) then
+    PenColor   := Colors[ColorsGrid.ColCount*Row+Col];
+  if (ssRight in Shift) then
+    BrushColor := Colors[ColorsGrid.ColCount*Row+Col];
   ColorLabel1.Color := PenColor;
   ColorLabel2.Color := BrushColor;
   for i := low(Figures) to high(Figures) do
   begin
     if (Figures[i].Selected) then
     begin
-      if (ssLeft in Shift) then(Figures[i] as TVisibleFigure).FigurePenColor := PenColor;
-      if (ssRight in Shift) then (Figures[i] as TVisibleFigure).FigureBrushColor := BrushColor;
+      if (ssLeft in Shift) then
+        (Figures[i] as TVisibleFigure).FigurePenColor   := PenColor;
+      if (ssRight in Shift) then
+        (Figures[i] as TVisibleFigure).FigureBrushColor := BrushColor;
     end;
   end;
   MainPaintBox.Invalidate;
@@ -448,9 +445,7 @@ var
   i: integer;
 begin
   for i := low(Figures) to high(Figures) do
-  begin
     Figures[i].Draw(MainPaintBox.Canvas);
-  end;
 
   if round(MinFloatPoint.X*Zoom/100)<HorizontalScrollBar.Min then
     HorizontalScrollBar.Min:=round(MinFloatPoint.X*Zoom/100);
@@ -475,11 +470,13 @@ begin
   HorizontalScrollBar.Position:=Offset.x;
   VerticalScrollBar.Position:=Offset.y;
   if (HistoryBuffer.AvaibleRedos=0) then
-    RedoMenuItem.Enabled := false else
-      RedoMenuItem.Enabled := true;
+    RedoMenuItem.Enabled := false
+  else
+    RedoMenuItem.Enabled := true;
   if (HistoryBuffer.AvaibleUndos=0) then
-    UndoMenuItem.Enabled := false else
-      UndoMenuItem.Enabled := true;
+    UndoMenuItem.Enabled := false
+  else
+    UndoMenuItem.Enabled := true;
 
   if (HistoryBuffer.ShowAsterisk) then
     MainForm.Caption:='Dynnu - '+ImageName+'*'
@@ -489,8 +486,7 @@ end;
 
 procedure TMainForm.ScrollBarChange(Sender: TObject);
 begin
-  scalesunit.SetOffset(FloatPoint(
-    BotScrollCent-HorizontalScrollBar.Position,
+  SetOffset(FloatPoint(BotScrollCent-HorizontalScrollBar.Position,
     RightScrollCent-VerticalScrollBar.Position));
 
   BotScrollCent   := HorizontalScrollBar.Position;

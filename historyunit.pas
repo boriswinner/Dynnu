@@ -24,7 +24,6 @@ type
     procedure CutOff;
     procedure DeleteBuffer;
     function ShowAsterisk: boolean;
-    function GetElement(APos: integer): StringArray;
   end;
 
 var
@@ -95,11 +94,6 @@ implementation
     else
       Result := false;
   end;
-
- function TCycleBuffer.GetElement(APos: integer): StringArray;
- begin
-
- end;
 
  initialization
  HistoryBuffer := TCycleBuffer.Create;

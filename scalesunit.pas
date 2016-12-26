@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
-  ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin, FPCanvas, TypInfo;
+  ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, Spin,
+  FPCanvas, TypInfo;
 
 function  WorldToScreen        (APoint: TFloatPoint): TPoint;
 function  ScreenToWorld        (APoint: TPoint):      TFloatPoint;

@@ -12,7 +12,6 @@ const
 
 var
   ImageName, LastSavedFile: string;
-  FileWasChanged: boolean;
 
 type
   StringArray = figuresunit.StringArray;
@@ -106,7 +105,6 @@ begin
   CloseFile(f);
   ImageName := AFileName;
   LastSavedFile := AFileName;
-  FileWasChanged:=false;
 end;
 
 end.

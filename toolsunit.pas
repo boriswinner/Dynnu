@@ -15,10 +15,6 @@ type
   TToolClass   = class of TTool;
   TParameterClass = class of TParameter;
   TParameterClassArray = array of TParameterClass;
-  CreatedParameters = record
-    ParameterClassArray: TParameterClassArray;
-    created: array of boolean;
-  end;
 
   TTool = class
     public
@@ -30,7 +26,8 @@ type
     procedure Initialize(APanel: TPanel; APaintBox: TPaintBox); virtual;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); virtual;
     procedure AddPoint(APoint: TPoint); virtual;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); virtual;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer;
+      RBtn: boolean; APanel: TPanel); virtual;
   end;
 
   TVisibleTool = class (TTool)
@@ -40,7 +37,6 @@ type
 
   TTwoPointsTool = class(TVisibleTool)
   public
-    procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint); override;
     procedure AddPoint(APoint: TPoint); override;
   end;
 
@@ -105,19 +101,22 @@ type
     Figure: THandFigure;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);override;
     procedure AddPoint(APoint: TPoint); override;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer;
+      RBtn: boolean; APanel: TPanel); override;
   end;
 
   TMagnifierTool  = class(TTwoPointsInvisibleTools)
   public
     Figure: TRectangle;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer;
+      RBtn: boolean; APanel: TPanel); override;
   end;
 
   TRectSelectionTool = class(TTwoPointsInvisibleTools)
   public
     Figure: TRectangle;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer;
+      RBtn: boolean; APanel: TPanel); override;
   end;
 
   TMoveTool = class(TInvisibleTool)
@@ -125,7 +124,8 @@ type
     Figure: THandFigure;
     procedure FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);override;
     procedure AddPoint(APoint: TPoint); override;
-    procedure StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel); override;
+    procedure StopDraw(X,Y, AHeight, AWidth: integer;
+      RBtn: boolean; APanel: TPanel); override;
   end;
 
   TParameterTool = class(TInvisibleTool)
@@ -206,7 +206,7 @@ begin
   Figures[high(Figures)] := AFigureClass.Create;
   with Figures[high(Figures)] do begin
     SetLength(Points,1);
-    Points[high(Points)] := scalesunit.ScreenToWorld(APoint);
+    Points[high(Points)] := ScreenToWorld(APoint);
   end;
 end;
 
@@ -219,11 +219,6 @@ begin
     FigurePenWidth := PenWidth;
   end;
   SetMaxMinFloatPoints(ScreenToWorld(APoint));
-end;
-
-procedure TTwoPointsTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
-begin
-  Inherited;
 end;
 
 procedure TTwoPointsPenStyleTool.FigureCreate(AFigureClass: TFigureClass; APoint: TPoint);
@@ -278,7 +273,7 @@ begin
     begin
       DeleteObject(FigureRegion);
       SetRegion;
-      if (PtInRegion(FigureRegion,APoint.X,Apoint.Y)=true) and (Selected = false) then
+      if (PtInRegion(FigureRegion,APoint.X,Apoint.Y)) and (not Selected) then
       begin
         Selected := true;
         tempSelection:=i;
@@ -350,9 +345,8 @@ begin
       end;
     end;
   end;
-  with Figures[high(Figures)] do begin
+  with Figures[high(Figures)] do
     Points[low(Points)] := ScreenToWorld(APoint);
-  end;
 end;
 
 procedure RegisterTool(ATool: TTool; AFigureClass: TFigureClass; ABitmapFile: string);
@@ -420,7 +414,8 @@ begin
       begin
         with Figures[i] do
         begin
-          if (CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION) then
+          if (CombineRgn(t,Figures[i].FigureRegion,
+            Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION) then
               Selected := false;
         end;
       end;
@@ -430,8 +425,9 @@ begin
         DeleteObject(Figures[i].FigureRegion);
         Figures[i].SetRegion;
         t := CreateRectRgn(1,1,2,2);
-        if CombineRgn(t,Figures[i].FigureRegion,Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION then
-          Figures[i].Selected := not Figures[i].Selected;
+        if CombineRgn(t,Figures[i].FigureRegion,
+          Figures[high(Figures)].FigureRegion,RGN_AND) <> NULLREGION then
+            Figures[i].Selected := not Figures[i].Selected;
         DeleteObject(t);
     end;
   end;
@@ -474,12 +470,14 @@ begin
   params[i].Create.CreateEditor(APanel);
 end;
 
-procedure THandTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
+procedure THandTool.StopDraw(X,Y, AHeight, AWidth: integer;
+  RBtn: boolean; APanel: TPanel);
 begin
   setlength(Figures,length(Figures)-1);
 end;
 
-procedure TMoveTool.StopDraw(X,Y, AHeight, AWidth: integer; RBtn: boolean; APanel: TPanel);
+procedure TMoveTool.StopDraw(X,Y, AHeight, AWidth: integer;
+  RBtn: boolean; APanel: TPanel);
 var
   i: integer;
 begin
@@ -921,13 +919,16 @@ begin
           altindex := i;
         end else
         begin
-         for z := low(ToolsRegister[previndex].Parameters) to high(ToolsRegister[previndex].Parameters) do
+         for z := low(ToolsRegister[previndex].Parameters) to
+           high(ToolsRegister[previndex].Parameters) do
          begin
           isPresented := false;
-          for q := low(ToolsRegister[j].Parameters) to high(ToolsRegister[j].Parameters) do
+          for q := low(ToolsRegister[j].Parameters) to
+            high(ToolsRegister[j].Parameters) do
           begin
-            if ToolsRegister[previndex].Parameters[z] = ToolsRegister[j].Parameters[q] then
-              isPresented := true;
+            if ToolsRegister[previndex].Parameters[z] =
+              ToolsRegister[j].Parameters[q] then
+                isPresented := true;
           end;
           setlength(tGood,length(ToolsRegister[previndex].Parameters));
           if (not isPresented) then
