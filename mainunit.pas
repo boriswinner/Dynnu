@@ -234,7 +234,6 @@ begin
   begin
     ImageName:= OpenImageDialog.FileName;
     LastSavedFile := ImageName;
-    FileWasChanged:=false;
     LoadFromStringArray(ReadFromFile(OpenImageDialog.FileName));
     HistoryBuffer.DeleteBuffer;
     HistoryBuffer.AddToBuffer;
