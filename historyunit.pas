@@ -16,7 +16,6 @@ const
   ActionMove = 'Moved Item';
 
 type
-  StringArray = saveunit.StringArray;
 
   TCycleBuffer = class
   public
@@ -99,10 +98,7 @@ implementation
 
   function TCycleBuffer.ShowAsterisk: boolean;
   begin
-    if (position <> savedposition) then
-      Result := true
-    else
-      Result := false;
+    Result := position = savedposition;
   end;
 
   function TCycleBuffer.UpdateSpos: integer;

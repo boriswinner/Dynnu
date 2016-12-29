@@ -1,11 +1,11 @@
 object MainForm: TMainForm
-  Left = 661
+  Left = 543
   Height = 480
   Top = 166
-  Width = 603
+  Width = 721
   Caption = 'Dynnu'
   ClientHeight = 460
-  ClientWidth = 603
+  ClientWidth = 721
   Constraints.MinHeight = 240
   Constraints.MinWidth = 320
   KeyPreview = True
@@ -19,10 +19,10 @@ object MainForm: TMainForm
     Left = 170
     Height = 460
     Top = 0
-    Width = 345
+    Width = 463
     Align = alClient
     ClientHeight = 460
-    ClientWidth = 345
+    ClientWidth = 463
     Color = clWhite
     ParentColor = False
     TabOrder = 0
@@ -30,7 +30,7 @@ object MainForm: TMainForm
       Left = 1
       Height = 441
       Top = 1
-      Width = 326
+      Width = 444
       Align = alClient
       Color = clWhite
       ParentColor = False
@@ -41,7 +41,7 @@ object MainForm: TMainForm
       OnResize = MainPaintBoxResize
     end
     object VerticalScrollBar: TScrollBar
-      Left = 327
+      Left = 445
       Height = 441
       Top = 1
       Width = 17
@@ -55,7 +55,7 @@ object MainForm: TMainForm
       Left = 1
       Height = 17
       Top = 442
-      Width = 343
+      Width = 461
       Align = alBottom
       PageSize = 0
       TabOrder = 1
@@ -63,7 +63,7 @@ object MainForm: TMainForm
     end
   end
   object ColorsPanel: TPanel
-    Left = 515
+    Left = 633
     Height = 460
     Top = 0
     Width = 88

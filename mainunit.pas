@@ -11,7 +11,6 @@ uses
 
 type
   TFigureClass = figuresunit.TFigureClass;
-  StringArray = historyunit.StringArray;
 
   { TMainForm }
 
