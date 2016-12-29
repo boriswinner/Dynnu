@@ -98,7 +98,7 @@ implementation
 
   function TCycleBuffer.ShowAsterisk: boolean;
   begin
-    Result := position = savedposition;
+    Result := not(position = savedposition);
   end;
 
   function TCycleBuffer.UpdateSpos: integer;
