@@ -31,6 +31,8 @@ type
     MainPaintBox: TPaintBox;
     EditSubMenu: TMenuItem;
     HistoryPanel: TPanel;
+    MoveUpMenuItem: TMenuItem;
+    MoveDownMenuItem: TMenuItem;
     UndoMenuItem: TMenuItem;
     RedoMenuItem: TMenuItem;
     OpenMenuitem: TMenuItem;
@@ -56,6 +58,8 @@ type
     procedure HistoryListBoxMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure HistoryListBoxSelectionChange(Sender: TObject; User: boolean);
+    procedure MoveDownMenuItemClick(Sender: TObject);
+    procedure MoveUpMenuItemClick(Sender: TObject);
     procedure OpenMenuitemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
     procedure SaveAsMenuItemClick(Sender: TObject);
@@ -258,6 +262,30 @@ begin
       HistoryBuffer.Redo;
     end;
   end;
+end;
+
+procedure TMainForm.MoveDownMenuItemClick(Sender: TObject);
+var
+  i: integer;
+begin
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      Figures[i].MoveDown(i);
+  end;
+  MainPaintBox.Invalidate;
+end;
+
+procedure TMainForm.MoveUpMenuItemClick(Sender: TObject);
+var
+  i: integer;
+begin
+  for i := high(Figures) downto low(Figures) do
+  begin
+    if (Figures[i].Selected) then
+      Figures[i].MoveUp(i);
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TMainForm.OpenMenuitemClick(Sender: TObject);

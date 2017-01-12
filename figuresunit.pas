@@ -24,6 +24,8 @@ type
     procedure SetRegion; virtual; abstract;
     function Save: StringArray; virtual;
     procedure Load(AParams: StringArray); virtual;
+    function MoveUp(APos: integer): boolean;
+    function MoveDown(APos: integer): boolean;
   end;
 
   TVisibleFigure = class (TFigure)
@@ -597,6 +599,34 @@ begin
   Inherited;
   FigureR.x := StrToIntDef(ExtractWord(1,aParams[7],[' ']),0);
   FigureR.y := StrToIntDef(ExtractWord(2,aParams[7],[' ']),0);
+end;
+
+function TFigure.MoveUp(APos: integer): boolean;
+var
+  t: tFigure;
+begin
+  t := figures[APos];
+  Result := false;
+  if (APos < high(figures)) then
+  begin
+    figures[APos] := figures[APos+1];
+    figures[APos+1] := t;
+    Result := true;
+  end;
+end;
+
+function TFigure.MoveDown(APos: integer): boolean;
+var
+  t: tFigure;
+begin
+  t := figures[APos];
+  Result := false;
+  if (APos-1 > low(figures)) then
+  begin
+    figures[APos] := figures[APos-1];
+    figures[APos-1] := t;
+    Result := true;
+  end;
 end;
 
 initialization

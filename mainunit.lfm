@@ -74,7 +74,7 @@ object MainForm: TMainForm
     object ColorLabel1: TLabel
       Left = 1
       Height = 15
-      Top = 429
+      Top = 379
       Width = 86
       Align = alBottom
       Caption = '   '
@@ -83,7 +83,7 @@ object MainForm: TMainForm
     object ColorLabel2: TLabel
       Left = 1
       Height = 15
-      Top = 444
+      Top = 394
       Width = 86
       Align = alBottom
       Caption = '   '
@@ -111,7 +111,7 @@ object MainForm: TMainForm
     object HistoryPanel: TPanel
       Left = 1
       Height = 50
-      Top = 379
+      Top = 409
       Width = 86
       Align = alBottom
       Caption = 'HistoryPanel'
@@ -145,7 +145,7 @@ object MainForm: TMainForm
     object ZoomSpinEdit: TSpinEdit
       Left = 1
       Height = 23
-      Top = 373
+      Top = 358
       Width = 168
       Align = alBottom
       Alignment = taCenter
@@ -159,7 +159,7 @@ object MainForm: TMainForm
     object ShowAllButton: TButton
       Left = 1
       Height = 25
-      Top = 396
+      Top = 381
       Width = 168
       Align = alBottom
       Caption = 'Show All'
@@ -177,7 +177,7 @@ object MainForm: TMainForm
     object ZoomLabel: TLabel
       Left = 1
       Height = 15
-      Top = 358
+      Top = 406
       Width = 168
       Align = alBottom
       Caption = 'Zoom'
@@ -243,6 +243,14 @@ object MainForm: TMainForm
         Caption = 'Redo'
         ShortCut = 16473
         OnClick = RedoMenuItemClick
+      end
+      object MoveUpMenuItem: TMenuItem
+        Caption = 'Move Selected Figures Up'
+        OnClick = MoveUpMenuItemClick
+      end
+      object MoveDownMenuItem: TMenuItem
+        Caption = 'Move Selected Figures Down'
+        OnClick = MoveDownMenuItemClick
       end
     end
     object HelpSubMenu: TMenuItem
