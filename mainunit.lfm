@@ -252,6 +252,14 @@ object MainForm: TMainForm
         Caption = 'Move Selected Figures Down'
         OnClick = MoveDownMenuItemClick
       end
+      object MoveToTopMenuItem: TMenuItem
+        Caption = 'Move Selected Figures To Top'
+        OnClick = MoveToTopMenuItemClick
+      end
+      object MoveToBottomMenuItem: TMenuItem
+        Caption = 'Move Selected Figures To Bottom'
+        OnClick = MoveToBottomMenuItemClick
+      end
     end
     object HelpSubMenu: TMenuItem
       Caption = 'Help'

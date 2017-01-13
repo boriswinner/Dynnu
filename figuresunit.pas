@@ -26,6 +26,8 @@ type
     procedure Load(AParams: StringArray); virtual;
     function MoveUp(APos: integer): boolean;
     function MoveDown(APos: integer): boolean;
+    procedure MoveToTop(APos: integer);
+    procedure MoveToBottom(APos: integer);
   end;
 
   TVisibleFigure = class (TFigure)
@@ -626,6 +628,34 @@ begin
     figures[APos] := figures[APos-1];
     figures[APos-1] := t;
     Result := true;
+  end;
+end;
+
+procedure TFigure.MoveToTop(APos: integer);
+var
+  t: tFigure;
+  i: integer;
+begin
+  if (APos < high(Figures)) then
+  begin
+    t := figures[APos];
+    for i := APos to high(Figures)-1 do
+      figures[i] := figures[i+1];
+    figures[high(Figures)] := t;
+  end;
+end;
+
+procedure TFigure.MoveToBottom(APos: integer);
+var
+  t: tFigure;
+  i: integer;
+begin
+  if (APos > low(Figures)+1) then
+  begin
+    t := figures[APos];
+    for i := APos downto low(Figures)+2  do
+      figures[i] := figures[i-1];
+    figures[low(Figures)+1] := t;
   end;
 end;
 

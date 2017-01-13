@@ -31,6 +31,8 @@ type
     MainPaintBox: TPaintBox;
     EditSubMenu: TMenuItem;
     HistoryPanel: TPanel;
+    MoveToTopMenuItem: TMenuItem;
+    MoveToBottomMenuItem: TMenuItem;
     MoveUpMenuItem: TMenuItem;
     MoveDownMenuItem: TMenuItem;
     UndoMenuItem: TMenuItem;
@@ -59,6 +61,8 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure HistoryListBoxSelectionChange(Sender: TObject; User: boolean);
     procedure MoveDownMenuItemClick(Sender: TObject);
+    procedure MoveToBottomMenuItemClick(Sender: TObject);
+    procedure MoveToTopMenuItemClick(Sender: TObject);
     procedure MoveUpMenuItemClick(Sender: TObject);
     procedure OpenMenuitemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
@@ -272,6 +276,38 @@ begin
   begin
     if (Figures[i].Selected) then
       Figures[i].MoveDown(i);
+  end;
+  MainPaintBox.Invalidate;
+end;
+
+procedure TMainForm.MoveToBottomMenuItemClick(Sender: TObject);
+var
+  i,shift: integer;
+begin
+  shift := 0;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i+shift].Selected) then
+    begin
+      Figures[i+shift].MoveToBottom(i+shift);
+      inc(shift);
+    end;
+  end;
+  MainPaintBox.Invalidate;
+end;
+
+procedure TMainForm.MoveToTopMenuItemClick(Sender: TObject);
+var
+  i,shift: integer;
+begin
+  shift := 0;
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i-shift].Selected) then
+    begin
+      Figures[i-shift].MoveToTop(i-shift);
+      inc(shift);
+    end;
   end;
   MainPaintBox.Invalidate;
 end;
