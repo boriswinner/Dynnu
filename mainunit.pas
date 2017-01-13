@@ -285,7 +285,7 @@ var
   i,shift: integer;
 begin
   shift := 0;
-  for i := low(Figures) to high(Figures) do
+  for i := high(Figures) downto low(Figures)+1 do
   begin
     if (Figures[i+shift].Selected) then
     begin

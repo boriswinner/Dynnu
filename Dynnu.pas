@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, mainunit, aboutunit, figuresunit, toolsunit, 
-scalesunit, historyunit, saveunit
+scalesunit, historyunit, saveunit, clipboardunit
   { you can add units after this };
 
 {$R *.res}
