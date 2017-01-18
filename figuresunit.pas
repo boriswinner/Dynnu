@@ -28,6 +28,9 @@ type
     function MoveDown(APos: integer): boolean;
     procedure MoveToTop(APos: integer);
     procedure MoveToBottom(APos: integer);
+    procedure Copy(AFigure: TFigure); virtual;
+    function GetCopy: TFigure; virtual;
+    procedure FDelete(APos: integer);
   end;
 
   TVisibleFigure = class (TFigure)
@@ -37,6 +40,8 @@ type
     procedure Draw(Canvas: TCanvas); override;
     function Save: StringArray override;
     procedure Load(AParams: StringArray); override;
+    procedure Copy(AFigure: TFigure); override;
+    function GetCopy: TFigure; override;
   end;
 
   TInvisibleFigure = class (TFigure)
@@ -49,6 +54,8 @@ type
     FigurePenStyle: TPenStyle;
     function Save: StringArray; override;
     procedure Load(AParams: StringArray); override;
+    procedure Copy(AFigure: TFigure);  override;
+    function GetCopy: TFigure; override;
   end;
 
   TBrushStyleFigure = class (TPenStyleFigure)
@@ -56,6 +63,8 @@ type
     FigureBrushStyle: TBrushStyle;
     function Save: StringArray; override;
     procedure Load(AParams: StringArray); override;
+    procedure Copy(AFigure: TFigure);  override;
+    function GetCopy: TFigure; override;
   end;
 
   TPolyline       = class(TVisibleFigure)
@@ -657,6 +666,68 @@ begin
       figures[i] := figures[i-1];
     figures[low(Figures)+1] := t;
   end;
+end;
+
+procedure TFigure.Copy(AFigure: TFigure);
+var
+  i: integer;
+begin
+  setlength(AFigure.Points,length(Points));
+  for i := low(Points) to high(Points) do
+    AFigure.Points[i] := Points[i];
+end;
+
+procedure TVisibleFigure.Copy(AFigure: TFigure);
+begin
+  Inherited;
+  TVisibleFigure(AFigure).FigurePenColor:=FigurePenColor;
+  TVisibleFigure(AFigure).FigureBrushColor:=FigureBrushColor;
+  TVisibleFigure(AFigure).FigurePenWidth:=FigurePenWidth;
+end;
+
+procedure TPenStyleFigure.Copy(AFigure: TFigure);
+begin
+  Inherited;
+  TPenStyleFigure(AFigure).FigurePenStyle:=FigurePenStyle;
+end;
+
+procedure TBrushStyleFigure.Copy(AFigure: TFigure);
+begin
+  Inherited;
+  TBrushStyleFigure(AFigure).FigureBrushStyle:=FigureBrushStyle;
+end;
+
+function TFigure.GetCopy: TFigure;
+begin
+  Result := TFigure.Create;
+  Result.Copy(Result);
+end;
+
+function TVisibleFigure.GetCopy: TFigure;
+begin
+  Result := TVisibleFigure.Create;
+  Result.Copy(Result);
+end;
+
+function TPenStyleFigure.GetCopy: TFigure;
+begin
+  Result := TPenStyleFigure.Create;
+  Result.Copy(Result);
+end;
+
+function TBrushStyleFigure.GetCopy: TFigure;
+begin
+  Result := TBrushStyleFigure.Create;
+  Result.Copy(Result);
+end;
+
+procedure TFigure.FDelete(APos: integer);
+var
+  i: integer;
+begin
+  for i := APos to high(Figures)-1 do
+    Figures[i] := Figures[i+1];
+  setlength(Figures,length(Figures)-1);
 end;
 
 initialization

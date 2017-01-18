@@ -32,6 +32,7 @@ type
     EditSubMenu: TMenuItem;
     HistoryPanel: TPanel;
     CopyMenuItem: TMenuItem;
+    DeteleMenuItem: TMenuItem;
     PasteMenuItem: TMenuItem;
     MoveToTopMenuItem: TMenuItem;
     MoveToBottomMenuItem: TMenuItem;
@@ -56,6 +57,7 @@ type
     procedure AboutMenuItemClick(Sender: TObject);
     procedure AntiAliasingComboBoxChange(Sender: TObject);
     procedure CopyMenuItemClick(Sender: TObject);
+    procedure DeteleMenuItemClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -218,6 +220,24 @@ begin
   Clipboard.SaveToClipboard(tArr);
 end;
 
+procedure TMainForm.DeteleMenuItemClick(Sender: TObject);
+var
+  i: integer;
+begin
+  i := 0;
+  while (i <= high(Figures)) do
+  begin
+    if (Figures[i].Selected) then
+    begin
+      Figures[i].FDelete(i);
+      HistoryBuffer.AddToBuffer(ActionDelete)
+    end
+    else
+      inc(i);
+  end;
+  MainPaintBox.Invalidate;
+end;
+
 procedure TMainForm.FormActivate(Sender: TObject);
 begin
   CurrentTool := TRectangleTool.Create;
@@ -296,7 +316,10 @@ begin
   for i := low(Figures) to high(Figures) do
   begin
     if (Figures[i].Selected) then
+    begin
       Figures[i].MoveDown(i);
+      HistoryBuffer.AddToBuffer(ActionMove);
+    end;
   end;
   MainPaintBox.Invalidate;
 end;
@@ -313,6 +336,7 @@ begin
     begin
       Figures[i+shift].MoveToBottom(i+shift);
       inc(shift);
+      HistoryBuffer.AddToBuffer(ActionMove);
     end;
   end;
   MainPaintBox.Invalidate;
@@ -330,6 +354,7 @@ begin
     begin
       Figures[i-shift].MoveToTop(i-shift);
       inc(shift);
+      HistoryBuffer.AddToBuffer(ActionMove);
     end;
   end;
   MainPaintBox.Invalidate;
@@ -343,7 +368,10 @@ begin
   for i := high(Figures) downto low(Figures) do
   begin
     if (Figures[i].Selected) then
+    begin
       Figures[i].MoveUp(i);
+      HistoryBuffer.AddToBuffer(ActionMove);
+    end;
   end;
   MainPaintBox.Invalidate;
 end;
@@ -377,7 +405,7 @@ begin
   for i := low(Clipboard.LoadFromClipboard) to high(Clipboard.LoadFromClipboard) do
   begin
     setlength(Figures,length(Figures)+1);
-    Figures[high(Figures)] := Clipboard.LoadFromClipboard[i];
+    Figures[high(Figures)] := Clipboard.LoadFromClipboard[i].GetCopy;
   end;
   MainPaintBox.Invalidate;
 end;

@@ -29,15 +29,19 @@ begin
   setlength(buffer,length(AFigures));
   for i := low(AFigures) to high(AFigures) do
   begin
-    buffer[i] := TRectangle.Create;
-//    buffer[i] := TFigure(AFigures[i].ClassType.Create);
-    buffer[i].Assign(AFigures[i]);
+   // buffer[i] := TRectangle.Create;
+    //buffer[i] := TFigure(AFigures[i].ClassType.Create);
+    buffer[i] := (AFigures[i].GetCopy);
   end;
 end;
 
 function TCLipboard.LoadFromClipboard: TFigureArray;
+var
+  i: integer;
 begin
-  Result := buffer;
+  setlength(Result,length(buffer));
+  for i := low(buffer) to high(buffer) do
+    result[i] := (buffer[i].GetCopy);
 end;
 
 initialization

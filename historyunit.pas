@@ -14,6 +14,7 @@ const
   ActionDraw = 'Drew Item';
   ActionChange = 'Changed Properties';
   ActionMove = 'Moved Item';
+  ActionDelete = 'Deleted Item';
 
 type
 
