@@ -12,8 +12,8 @@ type
 
   TCLipboard = class
     buffer: TFigureArray;
-    procedure SaveToClipboard(AFigures: TFigureArray);
-    function LoadFromClipboard: TFigureArray;
+    procedure SaveToClipboard;
+    procedure LoadFromClipboard;
   end;
 
 var
@@ -21,27 +21,29 @@ var
 
 implementation
 
-procedure TCLipboard.SaveToClipboard(AFigures: TFigureArray);
+procedure TCLipboard.SaveToClipboard;
 var
   i: integer;
 begin
-  setlength(buffer,0);
-  setlength(buffer,length(AFigures));
-  for i := low(AFigures) to high(AFigures) do
+  for i := low(Figures) to high(Figures) do
   begin
-   // buffer[i] := TRectangle.Create;
-    //buffer[i] := TFigure(AFigures[i].ClassType.Create);
-    buffer[i] := (AFigures[i].GetCopy);
+    if (Figures[i].Selected) then
+    begin
+      setlength(buffer,length(buffer)+1);
+      buffer[high(buffer)] := Figures[i].GetCopy;
+    end;
   end;
 end;
 
-function TCLipboard.LoadFromClipboard: TFigureArray;
+procedure TCLipboard.LoadFromClipboard;
 var
   i: integer;
 begin
-  setlength(Result,length(buffer));
   for i := low(buffer) to high(buffer) do
-    result[i] := (buffer[i].GetCopy);
+  begin
+    setlength(Figures,length(Figures)+1);
+    Figures[high(Figures)] := buffer[i];
+  end;
 end;
 
 initialization

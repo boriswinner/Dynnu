@@ -205,19 +205,8 @@ begin
 end;
 
 procedure TMainForm.CopyMenuItemClick(Sender: TObject);
-var
-  i: integer;
-  tArr: TFigureArray;
 begin
-  for i := low(Figures) to high(Figures) do
-  begin
-    if (Figures[i].Selected) then
-    begin
-      setlength(tArr,length(tArr)+1);
-      tArr[high(tArr)] := Figures[i];
-    end;
-  end;
-  Clipboard.SaveToClipboard(tArr);
+  Clipboard.SaveToClipboard;
 end;
 
 procedure TMainForm.DeteleMenuItemClick(Sender: TObject);
@@ -401,12 +390,8 @@ procedure TMainForm.PasteMenuItemClick(Sender: TObject);
 var
   i: integer;
 begin
-  //ShowMessage(IntToStr(length(Clipboard.LoadFromClipboard)));
-  for i := low(Clipboard.LoadFromClipboard) to high(Clipboard.LoadFromClipboard) do
-  begin
-    setlength(Figures,length(Figures)+1);
-    Figures[high(Figures)] := Clipboard.LoadFromClipboard[i].GetCopy;
-  end;
+  ShowMessage(IntToStr(length(Clipboard.buffer)));
+  Clipboard.LoadFromClipboard;
   MainPaintBox.Invalidate;
 end;
 

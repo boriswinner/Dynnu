@@ -83,6 +83,8 @@ type
   public
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
+    procedure Copy(AFigure: TFigure); override;
+    function GetCopy: TFigure; override;
   end;
 
   TEllipse        = class(TBrushStyleFigure)
@@ -697,6 +699,11 @@ begin
   TBrushStyleFigure(AFigure).FigureBrushStyle:=FigureBrushStyle;
 end;
 
+procedure TRectangle.Copy(AFigure: TFigure);
+begin
+  Inherited;
+end;
+
 function TFigure.GetCopy: TFigure;
 begin
   Result := TFigure.Create;
@@ -718,6 +725,12 @@ end;
 function TBrushStyleFigure.GetCopy: TFigure;
 begin
   Result := TBrushStyleFigure.Create;
+  Result.Copy(Result);
+end;
+
+function TRectangle.GetCopy: TFigure;
+begin
+  Result := TRectangle.Create;
   Result.Copy(Result);
 end;
 
