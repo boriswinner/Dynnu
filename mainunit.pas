@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
   ExtCtrls, StdCtrls, Grids, LCLIntf, LCLType, Buttons, GraphMath, Math, FPCanvas, TypInfo,
-  Spin, aboutunit, figuresunit, toolsunit, scalesunit, historyunit,saveunit,Types;
+  Spin, aboutunit, figuresunit, toolsunit, scalesunit, historyunit,saveunit,clipboardunit,Types;
 
 type
   TFigureClass = figuresunit.TFigureClass;
@@ -31,6 +31,8 @@ type
     MainPaintBox: TPaintBox;
     EditSubMenu: TMenuItem;
     HistoryPanel: TPanel;
+    CopyMenuItem: TMenuItem;
+    PasteMenuItem: TMenuItem;
     MoveToTopMenuItem: TMenuItem;
     MoveToBottomMenuItem: TMenuItem;
     MoveUpMenuItem: TMenuItem;
@@ -53,6 +55,7 @@ type
     OpenImageDialog: TOpenDialog;
     procedure AboutMenuItemClick(Sender: TObject);
     procedure AntiAliasingComboBoxChange(Sender: TObject);
+    procedure CopyMenuItemClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -65,6 +68,7 @@ type
     procedure MoveToTopMenuItemClick(Sender: TObject);
     procedure MoveUpMenuItemClick(Sender: TObject);
     procedure OpenMenuitemClick(Sender: TObject);
+    procedure PasteMenuItemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
     procedure SaveAsMenuItemClick(Sender: TObject);
     procedure SaveMenuItemClick(Sender: TObject);
@@ -198,6 +202,22 @@ begin
   Invalidate;
 end;
 
+procedure TMainForm.CopyMenuItemClick(Sender: TObject);
+var
+  i: integer;
+  tArr: TFigureArray;
+begin
+  for i := low(Figures) to high(Figures) do
+  begin
+    if (Figures[i].Selected) then
+    begin
+      setlength(tArr,length(tArr)+1);
+      tArr[high(tArr)] := Figures[i];
+    end;
+  end;
+  Clipboard.SaveToClipboard(tArr);
+end;
+
 procedure TMainForm.FormActivate(Sender: TObject);
 begin
   CurrentTool := TRectangleTool.Create;
@@ -272,6 +292,7 @@ procedure TMainForm.MoveDownMenuItemClick(Sender: TObject);
 var
   i: integer;
 begin
+  if (Figures[1].Selected) then exit;
   for i := low(Figures) to high(Figures) do
   begin
     if (Figures[i].Selected) then
@@ -285,6 +306,7 @@ var
   i,shift: integer;
 begin
   shift := 0;
+  if (Figures[1].Selected) then exit;
   for i := high(Figures) downto low(Figures)+1 do
   begin
     if (Figures[i+shift].Selected) then
@@ -301,6 +323,7 @@ var
   i,shift: integer;
 begin
   shift := 0;
+  if (Figures[high(Figures)].Selected) then exit;
   for i := low(Figures) to high(Figures) do
   begin
     if (Figures[i-shift].Selected) then
@@ -316,6 +339,7 @@ procedure TMainForm.MoveUpMenuItemClick(Sender: TObject);
 var
   i: integer;
 begin
+  if (Figures[high(Figures)].Selected) then exit;
   for i := high(Figures) downto low(Figures) do
   begin
     if (Figures[i].Selected) then
@@ -343,6 +367,19 @@ begin
     HistoryBuffer.AddToBuffer(ActionOpen);
     MainPaintBox.Invalidate;
   end;
+end;
+
+procedure TMainForm.PasteMenuItemClick(Sender: TObject);
+var
+  i: integer;
+begin
+  //ShowMessage(IntToStr(length(Clipboard.LoadFromClipboard)));
+  for i := low(Clipboard.LoadFromClipboard) to high(Clipboard.LoadFromClipboard) do
+  begin
+    setlength(Figures,length(Figures)+1);
+    Figures[high(Figures)] := Clipboard.LoadFromClipboard[i];
+  end;
+  MainPaintBox.Invalidate;
 end;
 
 procedure TMainForm.RedoMenuItemClick(Sender: TObject);

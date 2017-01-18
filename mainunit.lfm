@@ -246,19 +246,33 @@ object MainForm: TMainForm
       end
       object MoveUpMenuItem: TMenuItem
         Caption = 'Move Selected Figures Up'
+        ShortCut = 16422
         OnClick = MoveUpMenuItemClick
       end
       object MoveDownMenuItem: TMenuItem
         Caption = 'Move Selected Figures Down'
+        ShortCut = 16424
         OnClick = MoveDownMenuItemClick
       end
       object MoveToTopMenuItem: TMenuItem
         Caption = 'Move Selected Figures To Top'
+        ShortCut = 8230
         OnClick = MoveToTopMenuItemClick
       end
       object MoveToBottomMenuItem: TMenuItem
         Caption = 'Move Selected Figures To Bottom'
+        ShortCut = 8232
         OnClick = MoveToBottomMenuItemClick
+      end
+      object CopyMenuItem: TMenuItem
+        Caption = 'Copy Selected'
+        ShortCut = 16451
+        OnClick = CopyMenuItemClick
+      end
+      object PasteMenuItem: TMenuItem
+        Caption = 'Paste Items'
+        ShortCut = 16470
+        OnClick = PasteMenuItemClick
       end
     end
     object HelpSubMenu: TMenuItem
