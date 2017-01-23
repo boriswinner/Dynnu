@@ -32,7 +32,8 @@ type
     EditSubMenu: TMenuItem;
     HistoryPanel: TPanel;
     CopyMenuItem: TMenuItem;
-    DeteleMenuItem: TMenuItem;
+    DeleteMenuItem: TMenuItem;
+    CutMenuItem: TMenuItem;
     PasteMenuItem: TMenuItem;
     MoveToTopMenuItem: TMenuItem;
     MoveToBottomMenuItem: TMenuItem;
@@ -57,7 +58,8 @@ type
     procedure AboutMenuItemClick(Sender: TObject);
     procedure AntiAliasingComboBoxChange(Sender: TObject);
     procedure CopyMenuItemClick(Sender: TObject);
-    procedure DeteleMenuItemClick(Sender: TObject);
+    procedure CutMenuItemClick(Sender: TObject);
+    procedure DeleteMenuItemClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -209,7 +211,13 @@ begin
   Clipboard.SaveToClipboard;
 end;
 
-procedure TMainForm.DeteleMenuItemClick(Sender: TObject);
+procedure TMainForm.CutMenuItemClick(Sender: TObject);
+begin
+  Clipboard.SaveToClipboard;
+  DeleteMenuItemClick(TObject.Create);
+end;
+
+procedure TMainForm.DeleteMenuItemClick(Sender: TObject);
 var
   i: integer;
 begin
@@ -389,6 +397,7 @@ end;
 procedure TMainForm.PasteMenuItemClick(Sender: TObject);
 begin
   Clipboard.LoadFromClipboard;
+  HistoryBuffer.AddToBuffer(ActionPaste);
   MainPaintBox.Invalidate;
 end;
 
@@ -575,6 +584,7 @@ begin
         (Figures[i] as TVisibleFigure).FigurePenColor   := PenColor;
       if (ssRight in Shift) then
         (Figures[i] as TVisibleFigure).FigureBrushColor := BrushColor;
+      HistoryBuffer.AddToBuffer(historyunit.ActionChange);
     end;
   end;
   MainPaintBox.Invalidate;

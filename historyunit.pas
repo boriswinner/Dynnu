@@ -15,7 +15,7 @@ const
   ActionChange = 'Changed Properties';
   ActionMove = 'Moved Item';
   ActionDelete = 'Deleted Item';
-
+  ActionPaste = 'Pasted an Item';
 type
 
   TCycleBuffer = class

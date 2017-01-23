@@ -244,10 +244,10 @@ object MainForm: TMainForm
         ShortCut = 16473
         OnClick = RedoMenuItemClick
       end
-      object DeteleMenuItem: TMenuItem
+      object DeleteMenuItem: TMenuItem
         Caption = 'Delete Selected Figures'
-        ShortCut = 46
-        OnClick = DeteleMenuItemClick
+        ShortCut = 16472
+        OnClick = DeleteMenuItemClick
       end
       object MoveUpMenuItem: TMenuItem
         Caption = 'Move Selected Figures Up'
@@ -273,6 +273,10 @@ object MainForm: TMainForm
         Caption = 'Copy Selected'
         ShortCut = 16451
         OnClick = CopyMenuItemClick
+      end
+      object CutMenuItem: TMenuItem
+        Caption = 'Cut Selected'
+        OnClick = CutMenuItemClick
       end
       object PasteMenuItem: TMenuItem
         Caption = 'Paste Items'
