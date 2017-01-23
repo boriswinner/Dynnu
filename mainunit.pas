@@ -387,10 +387,7 @@ begin
 end;
 
 procedure TMainForm.PasteMenuItemClick(Sender: TObject);
-var
-  i: integer;
 begin
-  ShowMessage(IntToStr(length(Clipboard.buffer)));
   Clipboard.LoadFromClipboard;
   MainPaintBox.Invalidate;
 end;

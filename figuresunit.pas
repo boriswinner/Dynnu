@@ -83,7 +83,6 @@ type
   public
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
-    procedure Copy(AFigure: TFigure); override;
     function GetCopy: TFigure; override;
   end;
 
@@ -91,6 +90,7 @@ type
   public
     procedure Draw(Canvas:TCanvas); override;
     procedure SetRegion; override;
+    function GetCopy: TFigure; override;
   end;
 
   TRoundRect      = class(TBrushStyleFigure)
@@ -100,6 +100,8 @@ type
     procedure SetRegion; override;
     function Save: StringArray; override;
     procedure Load(AParams: StringArray); override;
+    procedure Copy(AFigure: TFigure); override;
+    function GetCopy: TFigure; override;
   end;
 
   TPolygon = class(TBrushStyleFigure)
@@ -114,6 +116,8 @@ type
     procedure SetRegion; override;
     function Save: StringArray; override;
     procedure Load(AParams: StringArray); override;
+    procedure Copy(AFigure: TFigure); override;
+    function GetCopy: TFigure; override;
   end;
 
   THandFigure     = class(TInvisibleFigure)
@@ -674,9 +678,12 @@ procedure TFigure.Copy(AFigure: TFigure);
 var
   i: integer;
 begin
-  setlength(AFigure.Points,length(Points));
-  for i := low(Points) to high(Points) do
-    AFigure.Points[i] := Points[i];
+  setlength(AFigure.Points,length(Self.Points));
+  for i := low(Self.Points) to high(Self.Points) do
+  begin
+    AFigure.Points[i].y := Self.Points[i].y;
+    AFigure.Points[i].x := Self.Points[i].x;
+  end;
 end;
 
 procedure TVisibleFigure.Copy(AFigure: TFigure);
@@ -699,9 +706,18 @@ begin
   TBrushStyleFigure(AFigure).FigureBrushStyle:=FigureBrushStyle;
 end;
 
-procedure TRectangle.Copy(AFigure: TFigure);
+procedure TRoundRect.Copy(AFigure: TFigure);
 begin
   Inherited;
+  TRoundRect(AFigure).FigureR := FigureR;
+end;
+
+procedure TPolygon.Copy(AFigure: TFigure);
+begin
+  Inherited;
+  TPolygon(AFigure).FigureCorners := FigureCorners;
+  TPolygon(AFigure).FigureAngle := FigureAngle;
+  TPolygon(AFigure).FigureAngleMode := FigureAngleMode;
 end;
 
 function TFigure.GetCopy: TFigure;
@@ -731,7 +747,25 @@ end;
 function TRectangle.GetCopy: TFigure;
 begin
   Result := TRectangle.Create;
-  Result.Copy(Result);
+  Self.Copy(Result);
+end;
+
+function TEllipse.GetCopy: TFigure;
+begin
+  Result := TEllipse.Create;
+  Self.Copy(Result);
+end;
+
+function TRoundRect.GetCopy: TFigure;
+begin
+  Result := TRoundRect.Create;
+  Self.Copy(Result);
+end;
+
+function TPolygon.GetCopy: TFigure;
+begin
+  Result := TPolygon.Create;
+  Self.Copy(Result);
 end;
 
 procedure TFigure.FDelete(APos: integer);
